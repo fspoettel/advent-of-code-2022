@@ -8,18 +8,25 @@ use std::{
     process,
 };
 
-const MODULE_TEMPLATE: &str = r###"pub fn part_one(input: &str) -> Option<u32> {
+const MODULE_TEMPLATE: &str = r###"type Input<'a> = Vec<&'a str>;
+
+fn parse(input: &str) -> Input {
+    input.lines().collect()
+}
+
+pub fn part_one(input: &Input) -> Option<u32> {
     None
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &Input) -> Option<u32> {
     None
 }
 
 fn main() {
-    let input = &advent_of_code::read_file("inputs", DAY);
-    advent_of_code::solve!(1, part_one, input);
-    advent_of_code::solve!(2, part_two, input);
+    let input = &advent_of_code::read_file("inputs", 2);
+    let parsed = advent_of_code::parse!(parse, input);
+    advent_of_code::solve!(1, part_one, &parsed);
+    advent_of_code::solve!(2, part_two, &parsed);
 }
 
 #[cfg(test)]
@@ -28,14 +35,14 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = advent_of_code::read_file("examples", DAY);
-        assert_eq!(part_one(&input), None);
+        let input = advent_of_code::read_file("examples", 2);
+        assert_eq!(part_one(&parse(&input)), None);
     }
 
     #[test]
     fn test_part_two() {
-        let input = advent_of_code::read_file("examples", DAY);
-        assert_eq!(part_two(&input), None);
+        let input = advent_of_code::read_file("examples", 2);
+        assert_eq!(part_two(&parse(&input)), None);
     }
 }
 "###;

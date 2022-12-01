@@ -5,12 +5,35 @@
  */
 use std::env;
 use std::fs;
+use std::time::{Duration, Instant};
 
 pub mod helpers;
 
 pub const ANSI_ITALIC: &str = "\x1b[3m";
 pub const ANSI_BOLD: &str = "\x1b[1m";
 pub const ANSI_RESET: &str = "\x1b[0m";
+
+pub fn run_timed<I, T>(func: impl FnOnce(I) -> T, input: I) -> (T, Duration) {
+    let timer = Instant::now();
+    let result = func(input);
+    let elapsed = timer.elapsed();
+    (result, elapsed)
+}
+
+pub fn format_duration(duration: &Duration) -> String {
+    format!("{}(elapsed: {:.2?}){}", ANSI_ITALIC, duration, ANSI_RESET)
+}
+
+#[macro_export]
+macro_rules! parse {
+    ($parser:ident, $input:expr) => {{
+        use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
+        let (result, elapsed) = advent_of_code::run_timed($parser, $input);
+        println!("🎄 {}Parser{} 🎄", ANSI_BOLD, ANSI_RESET);
+        println!("{}", advent_of_code::format_duration(&elapsed));
+        result
+    }};
+}
 
 #[macro_export]
 macro_rules! solve {
@@ -19,16 +42,11 @@ macro_rules! solve {
         use std::fmt::Display;
         use std::time::Instant;
 
-        fn print_result<T: Display>(func: impl FnOnce(&str) -> Option<T>, input: &str) {
-            let timer = Instant::now();
-            let result = func(input);
-            let elapsed = timer.elapsed();
+        fn print_result<I, T: Display>(func: impl FnOnce(I) -> Option<T>, input: I) {
+            let (result, elapsed) = advent_of_code::run_timed(func, input);
             match result {
                 Some(result) => {
-                    println!(
-                        "{} {}(elapsed: {:.2?}){}",
-                        result, ANSI_ITALIC, elapsed, ANSI_RESET
-                    );
+                    println!("{} {}", result, advent_of_code::format_duration(&elapsed));
                 }
                 None => {
                     println!("not solved.")
