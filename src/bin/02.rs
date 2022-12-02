@@ -13,11 +13,7 @@ fn parse(input: &str) -> Input {
 
 fn score_distance(theirs: u32, ours: u32) -> u32 {
     // game result can be determined by calculating wrapped distance.
-    let score = match if ours > theirs {
-        3 + theirs - ours
-    } else {
-        theirs - ours
-    } {
+    let score = match (3 + theirs - ours) % 3 {
         0 => 3,
         1 => 0,
         2 => 6,
