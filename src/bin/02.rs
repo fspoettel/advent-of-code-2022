@@ -4,9 +4,9 @@ fn parse(input: &str) -> Input {
     input
         .lines()
         .filter_map(|l| {
-            // normalize to index 1 with ASCII table. (A -> 65 | X -> 88)
+            // normalize to index 0 with ASCII table. (A -> 65 | X -> 88)
             let bytes = l.as_bytes();
-            Some(((bytes.first()? - 64) as u32, (bytes.last()? - 87) as u32))
+            Some(((bytes.first()? - 65) as u32, (bytes.last()? - 88) as u32))
         })
         .collect()
 }
@@ -24,7 +24,7 @@ fn score_distance(theirs: u32, ours: u32) -> u32 {
         _ => unreachable!(),
     };
 
-    score + ours
+    score + ours + 1
 }
 
 pub fn part_one(input: &Input) -> Option<u32> {
@@ -42,9 +42,9 @@ pub fn part_two(input: &Input) -> Option<u32> {
         .map(|&(theirs, result)| {
             // reverse scoring method to find our strategy for round.
             let ours = match result {
-                1 => (theirs + 2) % 3,
-                2 => theirs,
-                3 => (theirs + 1) % 3,
+                0 => (theirs + 2) % 3,
+                1 => theirs,
+                2 => (theirs + 1) % 3,
                 _ => unreachable!(),
             };
 
