@@ -38,7 +38,7 @@ fn format_duration(duration: &Duration, iterations: u64) -> String {
 pub fn bench<I: Copy, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) -> String {
     let mut stdout = stdout();
 
-    print!("Running benchmark...");
+    print!("> {}benchmarking...{}", ANSI_ITALIC, ANSI_RESET);
     let _ = stdout.flush();
 
     let bench_iterations = cmp::max(
@@ -122,6 +122,7 @@ macro_rules! solve {
 
         match result {
             Some(result) => {
+                print!("{} ", result);
                 println!(
                     "{} {}",
                     result,
