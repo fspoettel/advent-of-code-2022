@@ -14,8 +14,8 @@ pub const ANSI_ITALIC: &str = "\x1b[3m";
 pub const ANSI_BOLD: &str = "\x1b[1m";
 pub const ANSI_RESET: &str = "\x1b[0m";
 
-fn average_duration(numbers: &[Duration]) -> u64 {
-    numbers.iter().map(|d| d.as_nanos() as u64).sum::<u64>() / numbers.len() as u64
+fn average_duration(numbers: &[Duration]) -> u128 {
+    numbers.iter().map(|d| d.as_nanos()).sum::<u128>() / numbers.len() as u128
 }
 
 pub fn run_timed<I: Copy, T>(func: impl Fn(I) -> T, input: I) -> (T, Duration, u64) {
@@ -43,7 +43,7 @@ pub fn run_timed<I: Copy, T>(func: impl Fn(I) -> T, input: I) -> (T, Duration, u
 
 pub fn format_duration(duration: &Duration, iterations: u64) -> String {
     format!(
-        "{}(elapsed: {:.2?}) avg. from {} samples.{}",
+        "{}(avg. time: {:.2?} / {} samples){}",
         ANSI_ITALIC, duration, iterations, ANSI_RESET
     )
 }
@@ -102,20 +102,20 @@ fn parse_time(val: &str, postfix: &str) -> f64 {
 
 pub fn parse_exec_time(output: &str) -> f64 {
     output.lines().fold(0_f64, |acc, l| {
-        if !l.contains("elapsed:") {
+        if !l.contains("avg. time:") {
             acc
         } else {
-            let timing = l.split("(elapsed: ").last().unwrap();
+            let timing = l.split("(avg. time: ").last().unwrap();
             // use `contains` istd. of `ends_with`: string may contain ANSI escape sequences.
             // for possible time formats, see: https://github.com/rust-lang/rust/blob/1.64.0/library/core/src/time.rs#L1176-L1200
-            if timing.contains("ns)") {
+            if timing.contains("ns /") {
                 acc // range below rounding precision.
-            } else if timing.contains("µs)") {
-                acc + parse_time(timing, "µs") / 1000_f64
-            } else if timing.contains("ms)") {
-                acc + parse_time(timing, "ms")
-            } else if timing.contains("s)") {
-                acc + parse_time(timing, "s") * 1000_f64
+            } else if timing.contains("µs /") {
+                acc + parse_time(timing, "µs /") / 1000_f64
+            } else if timing.contains("ms /") {
+                acc + parse_time(timing, "ms /")
+            } else if timing.contains("s /") {
+                acc + parse_time(timing, "s /") * 1000_f64
             } else {
                 acc
             }
@@ -145,25 +145,25 @@ mod tests {
     fn test_parse_exec_time() {
         assert_approx_eq!(
             parse_exec_time(&format!(
-                "🎄 Part 1 🎄\n0 (elapsed: 74.13ns){}\n🎄 Part 2 🎄\n0 (elapsed: 50.00ns){}",
+                "🎄 Part 1 🎄\n0 (avg. time: 74.13ns / 10000 samples){}\n🎄 Part 2 🎄\n0 (avg. time: 50ns / 10000 samples){}",
                 ANSI_RESET, ANSI_RESET
             )),
             0_f64
         );
 
         assert_approx_eq!(
-            parse_exec_time("🎄 Part 1 🎄\n0 (elapsed: 755µs)\n🎄 Part 2 🎄\n0 (elapsed: 700µs)"),
+            parse_exec_time("🎄 Part 1 🎄\n0 (avg. time: 755µs / 10000 samples)\n🎄 Part 2 🎄\n0 (avg. time: 700µs / 9000 samples)"),
             1.455_f64
         );
 
         assert_approx_eq!(
-            parse_exec_time("🎄 Part 1 🎄\n0 (elapsed: 70µs)\n🎄 Part 2 🎄\n0 (elapsed: 1.45ms)"),
+            parse_exec_time("🎄 Part 1 🎄\n0 (avg. time: 70µs / 100 samples)\n🎄 Part 2 🎄\n0 (avg. time: 1.45ms / 10 samples)"),
             1.52_f64
         );
 
         assert_approx_eq!(
             parse_exec_time(
-                "🎄 Part 1 🎄\n0 (elapsed: 10.3s)\n🎄 Part 2 🎄\n0 (elapsed: 100.50ms)"
+                "🎄 Part 1 🎄\n0 (avg. time: 10.3s / 1 samples)\n🎄 Part 2 🎄\n0 (avg. time: 100.50ms / 0 samples)"
             ),
             10400.50_f64
         );
