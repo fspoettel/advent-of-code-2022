@@ -39,12 +39,7 @@ pub fn part_two(input: &Input) -> Option<u32> {
     Some(prios)
 }
 
-fn main() {
-    let input = &advent_of_code::read_file("inputs", 3);
-    let parsed = advent_of_code::parse!(parse, input);
-    advent_of_code::solve!(1, part_one, &parsed);
-    advent_of_code::solve!(2, part_two, &parsed);
-}
+advent_of_code::main!(3);
 
 #[cfg(test)]
 mod tests {

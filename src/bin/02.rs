@@ -46,12 +46,7 @@ pub fn part_two(input: &Input) -> Option<u32> {
     Some(score)
 }
 
-fn main() {
-    let input = &advent_of_code::read_file("inputs", 2);
-    let parsed = advent_of_code::parse!(parse, input);
-    advent_of_code::solve!(1, part_one, &parsed);
-    advent_of_code::solve!(2, part_two, &parsed);
-}
+advent_of_code::main!(2);
 
 #[cfg(test)]
 mod tests {

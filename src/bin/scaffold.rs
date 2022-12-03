@@ -22,12 +22,7 @@ pub fn part_two(input: &Input) -> Option<u32> {
     None
 }
 
-fn main() {
-    let input = &advent_of_code::read_file("inputs", DAY);
-    let parsed = advent_of_code::parse!(parse, input);
-    advent_of_code::solve!(1, part_one, &parsed);
-    advent_of_code::solve!(2, part_two, &parsed);
-}
+advent_of_code::main!(DAY);
 
 #[cfg(test)]
 mod tests {
