@@ -6,6 +6,7 @@
 use std::cmp;
 use std::env;
 use std::fs;
+use std::io::{stdout, Write};
 use std::time::{Duration, Instant};
 
 pub mod helpers;
@@ -14,11 +15,20 @@ pub const ANSI_ITALIC: &str = "\x1b[3m";
 pub const ANSI_BOLD: &str = "\x1b[1m";
 pub const ANSI_RESET: &str = "\x1b[0m";
 
+pub fn read_file(folder: &str, day: u8) -> String {
+    let cwd = env::current_dir().unwrap();
+
+    let filepath = cwd.join("src").join(folder).join(format!("{:02}.txt", day));
+
+    let f = fs::read_to_string(filepath);
+    f.expect("could not open input file")
+}
+
 fn average_duration(numbers: &[Duration]) -> u128 {
     numbers.iter().map(|d| d.as_nanos()).sum::<u128>() / numbers.len() as u128
 }
 
-pub fn format_duration(duration: &Duration, iterations: u64) -> String {
+fn format_duration(duration: &Duration, iterations: u64) -> String {
     format!(
         "{}(avg. time: {:.2?} / {} samples){}",
         ANSI_ITALIC, duration, iterations, ANSI_RESET
@@ -26,8 +36,13 @@ pub fn format_duration(duration: &Duration, iterations: u64) -> String {
 }
 
 pub fn bench<I: Copy, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) -> String {
+    let mut stdout = stdout();
+
+    print!("Running benchmark...");
+    let _ = stdout.flush();
+
     let bench_iterations = cmp::max(
-        Duration::from_secs(2).as_nanos() / cmp::max(base_time.as_nanos(), 10),
+        Duration::from_secs(2).as_nanos() / cmp::max(base_time.as_nanos(), 5),
         10,
     );
 
@@ -39,17 +54,10 @@ pub fn bench<I: Copy, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) 
         timers.push(timer.elapsed());
     }
 
+    print!("\r");
+
     let avg_time = Duration::from_nanos(average_duration(&timers) as u64);
     format_duration(&avg_time, bench_iterations as u64)
-}
-
-pub fn read_file(folder: &str, day: u8) -> String {
-    let cwd = env::current_dir().unwrap();
-
-    let filepath = cwd.join("src").join(folder).join(format!("{:02}.txt", day));
-
-    let f = fs::read_to_string(filepath);
-    f.expect("could not open input file")
 }
 
 fn parse_time(val: &str, postfix: &str) -> f64 {
@@ -91,7 +99,8 @@ macro_rules! parse {
 
         if $input != "" {
             println!("🎄 {}Parser{} 🎄", ANSI_BOLD, ANSI_RESET);
-            println!("{}", advent_of_code::bench($parser, $input, &base_time));
+            let time = advent_of_code::bench($parser, $input, &base_time);
+            println!("✓ {}", time);
         }
 
         result
@@ -120,7 +129,7 @@ macro_rules! solve {
                 );
             }
             None => {
-                println!("not solved.")
+                print!("not solved.")
             }
         }
     }};
