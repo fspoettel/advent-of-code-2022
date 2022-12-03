@@ -30,14 +30,14 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = advent_of_code::read_file("examples", DAY);
-        assert_eq!(part_one(&parse(&input)), None);
+        let result = part_one(&parse(&advent_of_code::read_file("examples", DAY)));
+        assert_eq!(result, None);
     }
 
     #[test]
     fn test_part_two() {
-        let input = advent_of_code::read_file("examples", DAY);
-        assert_eq!(part_two(&parse(&input)), None);
+        let result = part_two(&parse(&advent_of_code::read_file("examples", DAY)));
+        assert_eq!(result, None);
     }
 }
 "###;

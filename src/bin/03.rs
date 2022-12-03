@@ -47,13 +47,13 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = advent_of_code::read_file("examples", 3);
-        assert_eq!(part_one(&parse(&input)), Some(157));
+        let result = part_one(&parse(&advent_of_code::read_file("examples", 3)));
+        assert_eq!(result, Some(157));
     }
 
     #[test]
     fn test_part_two() {
-        let input = advent_of_code::read_file("examples", 3);
-        assert_eq!(part_two(&parse(&input)), Some(70));
+        let result = part_two(&parse(&advent_of_code::read_file("examples", 3)));
+        assert_eq!(result, Some(70));
     }
 }

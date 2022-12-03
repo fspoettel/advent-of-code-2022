@@ -32,13 +32,13 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = &advent_of_code::read_file("examples", 1);
-        assert_eq!(part_one(&parse(input)), Some(24000));
+        let result = part_one(&parse(&advent_of_code::read_file("examples", 1)));
+        assert_eq!(result, Some(24000));
     }
 
     #[test]
     fn test_part_two() {
-        let input = &advent_of_code::read_file("examples", 1);
-        assert_eq!(part_two(&parse(input)), Some(45000));
+        let result = part_two(&parse(&advent_of_code::read_file("examples", 1)));
+        assert_eq!(result, Some(45000));
     }
 }

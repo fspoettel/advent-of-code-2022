@@ -1,9 +1,9 @@
-use std::cmp;
 /*
  * This file contains template code.
  * There is no need to edit this file unless you want to change template functionality.
  * Prefer `./helpers.rs` if you want to extract code from your solutions.
  */
+use std::cmp;
 use std::env;
 use std::fs;
 use std::time::{Duration, Instant};
@@ -43,68 +43,6 @@ pub fn bench<I: Copy, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) 
     format_duration(&avg_time, bench_iterations as u64)
 }
 
-#[macro_export]
-macro_rules! main {
-    ($day:expr) => {
-        fn main() {
-            let input = advent_of_code::read_file("inputs", $day);
-            let parsed = advent_of_code::parse!(parse, &input);
-            advent_of_code::solve!(1, part_one, &parsed);
-            advent_of_code::solve!(2, part_two, &parsed);
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! parse {
-    ($parser:ident, $input:expr) => {{
-        use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
-        use std::time::Instant;
-
-        let timer = Instant::now();
-        let result = $parser($input);
-        let base_time = timer.elapsed();
-
-        if $input != "" {
-            println!("🎄 {}Parser{} 🎄", ANSI_BOLD, ANSI_RESET);
-            println!("{}", advent_of_code::bench($parser, $input, &base_time));
-        }
-
-        result
-    }};
-}
-
-#[macro_export]
-macro_rules! solve {
-    ($part:expr, $solver:ident, $input:expr) => {{
-        use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
-        use std::fmt::Display;
-        use std::time::Instant;
-
-        fn print_result<I: Copy, T: Display>(func: impl Fn(I) -> Option<T>, input: I) {
-            let timer = Instant::now();
-            let result = func(input);
-            let base_time = timer.elapsed();
-
-            match result {
-                Some(result) => {
-                    println!(
-                        "{} {}",
-                        result,
-                        advent_of_code::bench(func, input, &base_time)
-                    );
-                }
-                None => {
-                    println!("not solved.")
-                }
-            }
-        }
-
-        println!("🎄 {}Part {}{} 🎄", ANSI_BOLD, $part, ANSI_RESET);
-        print_result($solver, $input);
-    }};
-}
-
 pub fn read_file(folder: &str, day: u8) -> String {
     let cwd = env::current_dir().unwrap();
 
@@ -139,6 +77,65 @@ pub fn parse_exec_time(output: &str) -> f64 {
             }
         }
     })
+}
+
+#[macro_export]
+macro_rules! parse {
+    ($parser:ident, $input:expr) => {{
+        use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
+        use std::time::Instant;
+
+        let timer = Instant::now();
+        let result = $parser($input);
+        let base_time = timer.elapsed();
+
+        if $input != "" {
+            println!("🎄 {}Parser{} 🎄", ANSI_BOLD, ANSI_RESET);
+            println!("{}", advent_of_code::bench($parser, $input, &base_time));
+        }
+
+        result
+    }};
+}
+
+#[macro_export]
+macro_rules! solve {
+    ($part:expr, $solver:ident, $input:expr) => {{
+        use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
+        use std::fmt::Display;
+        use std::time::Instant;
+
+        println!("🎄 {}Part {}{} 🎄", ANSI_BOLD, $part, ANSI_RESET);
+
+        let timer = Instant::now();
+        let result = $solver($input);
+        let base_time = timer.elapsed();
+
+        match result {
+            Some(result) => {
+                println!(
+                    "{} {}",
+                    result,
+                    advent_of_code::bench($solver, $input, &base_time)
+                );
+            }
+            None => {
+                println!("not solved.")
+            }
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! main {
+    ($day:expr) => {
+        fn main() {
+            let input = advent_of_code::read_file("inputs", $day);
+            let parsed = advent_of_code::parse!(parse, &input);
+            advent_of_code::solve!(1, part_one, &parsed);
+            advent_of_code::solve!(2, part_two, &parsed);
+        }
+    };
 }
 
 /// copied from: https://github.com/rust-lang/rust/blob/1.64.0/library/std/src/macros.rs#L328-L333
