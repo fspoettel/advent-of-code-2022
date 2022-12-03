@@ -1,3 +1,4 @@
+use std::cmp;
 /*
  * This file contains template code.
  * There is no need to edit this file unless you want to change template functionality.
@@ -13,24 +14,47 @@ pub const ANSI_ITALIC: &str = "\x1b[3m";
 pub const ANSI_BOLD: &str = "\x1b[1m";
 pub const ANSI_RESET: &str = "\x1b[0m";
 
-pub fn run_timed<I, T>(func: impl FnOnce(I) -> T, input: I) -> (T, Duration) {
+fn average_duration(numbers: &[Duration]) -> u64 {
+    numbers.iter().map(|d| d.as_nanos() as u64).sum::<u64>() / numbers.len() as u64
+}
+
+pub fn run_timed<I: Copy, T>(func: impl Fn(I) -> T, input: I) -> (T, Duration, u64) {
     let timer = Instant::now();
     let result = func(input);
     let elapsed = timer.elapsed();
-    (result, elapsed)
+
+    let mut timers: Vec<Duration> = vec![];
+
+    let bench_iterations = cmp::max(Duration::from_secs(2).as_nanos() / elapsed.as_nanos(), 5);
+
+    for _ in 0..bench_iterations {
+        let timer = Instant::now();
+        func(input);
+        let elapsed = timer.elapsed();
+        timers.push(elapsed);
+    }
+
+    (
+        result,
+        Duration::from_nanos(average_duration(&timers) as u64),
+        bench_iterations as u64,
+    )
 }
 
-pub fn format_duration(duration: &Duration) -> String {
-    format!("{}(elapsed: {:.2?}){}", ANSI_ITALIC, duration, ANSI_RESET)
+pub fn format_duration(duration: &Duration, iterations: u64) -> String {
+    format!(
+        "{}(elapsed: {:.2?}) avg. from {} samples.{}",
+        ANSI_ITALIC, duration, iterations, ANSI_RESET
+    )
 }
 
 #[macro_export]
 macro_rules! parse {
     ($parser:ident, $input:expr) => {{
         use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
-        let (result, elapsed) = advent_of_code::run_timed($parser, $input);
+        let (result, elapsed, iterations) = advent_of_code::run_timed($parser, $input);
         println!("🎄 {}Parser{} 🎄", ANSI_BOLD, ANSI_RESET);
-        println!("{}", advent_of_code::format_duration(&elapsed));
+        println!("{}", advent_of_code::format_duration(&elapsed, iterations));
         result
     }};
 }
@@ -42,11 +66,15 @@ macro_rules! solve {
         use std::fmt::Display;
         use std::time::Instant;
 
-        fn print_result<I, T: Display>(func: impl FnOnce(I) -> Option<T>, input: I) {
-            let (result, elapsed) = advent_of_code::run_timed(func, input);
+        fn print_result<I: Copy, T: Display>(func: impl Fn(I) -> Option<T>, input: I) {
+            let (result, elapsed, iterations) = advent_of_code::run_timed(func, input);
             match result {
                 Some(result) => {
-                    println!("{} {}", result, advent_of_code::format_duration(&elapsed));
+                    println!(
+                        "{} {}",
+                        result,
+                        advent_of_code::format_duration(&elapsed, iterations),
+                    );
                 }
                 None => {
                     println!("not solved.")
