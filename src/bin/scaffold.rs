@@ -23,7 +23,7 @@ pub fn part_two(input: &Input) -> Option<u32> {
 }
 
 fn main() {
-    let input = &advent_of_code::read_file("inputs", 2);
+    let input = &advent_of_code::read_file("inputs", DAY);
     let parsed = advent_of_code::parse!(parse, input);
     advent_of_code::solve!(1, part_one, &parsed);
     advent_of_code::solve!(2, part_two, &parsed);
@@ -35,13 +35,13 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = advent_of_code::read_file("examples", 2);
+        let input = advent_of_code::read_file("examples", DAY);
         assert_eq!(part_one(&parse(&input)), None);
     }
 
     #[test]
     fn test_part_two() {
-        let input = advent_of_code::read_file("examples", 2);
+        let input = advent_of_code::read_file("examples", DAY);
         assert_eq!(part_two(&parse(&input)), None);
     }
 }
