@@ -29,10 +29,7 @@ fn average_duration(numbers: &[Duration]) -> u128 {
 }
 
 fn format_duration(duration: &Duration, iterations: u64) -> String {
-    format!(
-        "{}(avg. time: {:.2?} / {} samples){}",
-        ANSI_ITALIC, duration, iterations, ANSI_RESET
-    )
+    format!("(avg. time: {:.2?} / {} samples)", duration, iterations)
 }
 
 pub fn bench<I: Copy, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) -> String {
@@ -96,15 +93,14 @@ macro_rules! parse {
         use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
         use std::time::Instant;
 
-        println!("🎄 {}Parser{} 🎄", ANSI_BOLD, ANSI_RESET);
-
         let timer = Instant::now();
         let result = $parser($input);
         let base_time = timer.elapsed();
 
         if $input != "" {
+            print!("parser: ");
             let time = advent_of_code::bench($parser, $input, &base_time);
-            println!("✓ {}", time);
+            println!("parser: ✓ {}", time);
         }
 
         result
@@ -118,18 +114,19 @@ macro_rules! solve {
         use std::fmt::Display;
         use std::time::Instant;
 
-        println!("🎄 {}Part {}{} 🎄", ANSI_BOLD, $part, ANSI_RESET);
-
         let timer = Instant::now();
         let result = $solver($input);
         let base_time = timer.elapsed();
 
         match result {
             Some(result) => {
-                print!("{} ", result);
+                print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
                 println!(
-                    "{} {}",
+                    "part {}: {}{}{} {}",
+                    $part,
+                    ANSI_BOLD,
                     result,
+                    ANSI_RESET,
                     advent_of_code::bench($solver, $input, &base_time)
                 );
             }
