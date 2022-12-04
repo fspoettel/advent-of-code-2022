@@ -41,9 +41,12 @@ pub fn bench<I: Copy, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) 
     print!("> {}benchmarking...{}", ANSI_ITALIC, ANSI_RESET);
     let _ = stdout.flush();
 
-    let bench_iterations = cmp::max(
-        Duration::from_secs(2).as_nanos() / cmp::max(base_time.as_nanos(), 5),
-        10,
+    let bench_iterations = cmp::min(
+        100000,
+        cmp::max(
+            Duration::from_secs(2).as_nanos() / cmp::max(base_time.as_nanos(), 10),
+            10,
+        ),
     );
 
     let mut timers: Vec<Duration> = vec![];
@@ -93,12 +96,13 @@ macro_rules! parse {
         use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
         use std::time::Instant;
 
+        println!("🎄 {}Parser{} 🎄", ANSI_BOLD, ANSI_RESET);
+
         let timer = Instant::now();
         let result = $parser($input);
         let base_time = timer.elapsed();
 
         if $input != "" {
-            println!("🎄 {}Parser{} 🎄", ANSI_BOLD, ANSI_RESET);
             let time = advent_of_code::bench($parser, $input, &base_time);
             println!("✓ {}", time);
         }
@@ -130,7 +134,7 @@ macro_rules! solve {
                 );
             }
             None => {
-                print!("not solved.")
+                print!("not solved.\n")
             }
         }
     }};
