@@ -39,7 +39,7 @@ pub fn bench<I: Clone, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration)
     let bench_iterations = cmp::min(
         100000,
         cmp::max(
-            Duration::from_secs(2).as_nanos() / cmp::max(base_time.as_nanos(), 10),
+            Duration::from_secs(1).as_nanos() / cmp::max(base_time.as_nanos(), 10),
             10,
         ),
     );
