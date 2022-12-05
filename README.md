@@ -21,16 +21,16 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.
 
 | Day | Parser | Part 1 | Part 2 |
 | :---: | :---: | :---: | :---:  |
-| [Day 01](./src/bin/01.rs) | `34.7µs` | `15.0ns` | `5.2µs` |
-| [Day 02](./src/bin/02.rs) | `25.0µs` | `148.0ns` | `4.4µs` |
-| [Day 03](./src/bin/03.rs) | `4.5µs` | `13.8µs` | `13.7µs` |
-| [Day 04](./src/bin/04.rs) | `29.3µs` | `43.0ns` | `34.0ns` |
-| [Day 05](./src/bin/05.rs) | `66.7µs` | `33.2µs` | `33.5µs` |
+| [Day 1](./src/bin/01.rs) | `33.8µs` | `16.0ns` | `5.2µs` |
+| [Day 2](./src/bin/02.rs) | `24.8µs` | `191.0ns` | `4.5µs` |
+| [Day 3](./src/bin/03.rs) | `4.8µs` | `13.6µs` | `13.6µs` |
+| [Day 4](./src/bin/04.rs) | `29.2µs` | `27.0ns` | `27.0ns` |
+| [Day 5](./src/bin/05.rs) | `67.2µs` | `32.2µs` | `32.6µs` |
 
 **Total: 0.26ms**
 <!--- benchmarking table --->
 
-All solutions are measured (non scientifically) in `cargo run --release` on a `M1 Macbook Air 2020`.
+All solutions are measured (nonscientifically) via `cargo run --release` on a _M1 Macbook Air 2020_.
 
 ---
 

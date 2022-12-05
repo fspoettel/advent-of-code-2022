@@ -3,8 +3,7 @@
  * There is no need to edit this file unless you want to change template functionality.
  */
 use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
-
-use crate::readme_benchmarks::update_readme_benchmarks;
+use std::io;
 
 pub struct Timings {
     part_1: Option<String>,
@@ -13,12 +12,26 @@ pub struct Timings {
     total_nanos: f64,
 }
 
+#[derive(Debug)]
+pub enum Error {
+    BrokenPipe,
+    Parser(String),
+    IO(io::Error),
+}
+
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Error::IO(e)
+    }
+}
+
 pub fn get_path_for_bin(day: usize) -> String {
     let day_padded = format!("{:02}", day);
     format!("./src/bin/{}.rs", day_padded)
 }
 
-mod bin_runner {
+mod child_commands {
+    use super::{get_path_for_bin, Error};
     use std::{
         io::{BufRead, BufReader},
         path::Path,
@@ -26,30 +39,23 @@ mod bin_runner {
         thread,
     };
 
-    #[derive(Debug)]
-    pub enum RunError {
-        IO(std::io::Error),
-        BrokenPipe,
-    }
-
-    impl From<std::io::Error> for RunError {
-        fn from(e: std::io::Error) -> Self {
-            RunError::IO(e)
-        }
-    }
-
-    pub fn run_solution(day: usize) -> Result<Vec<String>, RunError> {
+    /// Run the solution bin for a given day
+    pub fn run_solution(day: usize) -> Result<Vec<String>, Error> {
         let day_padded = format!("{:02}", day);
 
-        if !Path::new(&super::get_path_for_bin(day)).exists() {
+        // skip command invocation for days that have not been scaffolded yet.
+        if !Path::new(&get_path_for_bin(day)).exists() {
             return Ok(vec![]);
         }
 
         let mut args = vec!["run", "--quiet", "--bin", &day_padded];
-
         if cfg!(not(debug_assertions)) {
+            // mirror `--release` flag to child invocations.
             args.push("--release");
         }
+
+        // spawn child command with piped stdout/stderr.
+        // forward output to stdout/stderr while grabbing stdout lines.
 
         let mut cmd = Command::new("cargo")
             .args(&args)
@@ -57,9 +63,10 @@ mod bin_runner {
             .stderr(Stdio::piped())
             .spawn()?;
 
+        let stdout = BufReader::new(cmd.stdout.take().ok_or(super::Error::BrokenPipe)?);
+        let stderr = BufReader::new(cmd.stderr.take().ok_or(super::Error::BrokenPipe)?);
+
         let mut output = vec![];
-        let stdout = BufReader::new(cmd.stdout.take().ok_or(RunError::BrokenPipe)?);
-        let stderr = BufReader::new(cmd.stderr.take().ok_or(RunError::BrokenPipe)?);
 
         let thread = thread::spawn(move || {
             stderr.lines().for_each(|line| {
@@ -77,35 +84,6 @@ mod bin_runner {
         cmd.wait()?;
 
         Ok(output)
-    }
-
-    fn parse_time(line: &str) -> Option<(&str, f64)> {
-        // for possible time formats, see: https://github.com/rust-lang/rust/blob/1.64.0/library/core/src/time.rs#L1176-L1200
-        let str_timing = line.split("(avg. time:").last()?.split('@').next()?.trim();
-
-        let parsed_timing = match str_timing {
-            s if s.contains("ns") => s.split("ns").next()?.parse::<f64>().ok(),
-            s if s.contains("µs") => s
-                .split("µs")
-                .next()?
-                .parse::<f64>()
-                .ok()
-                .map(|x| x * 1000_f64),
-            s if s.contains("ms") => s
-                .split("ms")
-                .next()?
-                .parse::<f64>()
-                .ok()
-                .map(|x| x * 1000000_f64),
-            s => s
-                .split('s')
-                .next()?
-                .parse::<f64>()
-                .ok()
-                .map(|x| x * 1000000000_f64),
-        }?;
-
-        Some((str_timing, parsed_timing))
     }
 
     pub fn parse_exec_time(output: &[String]) -> super::Timings {
@@ -145,8 +123,8 @@ mod bin_runner {
                     "parser" => {
                         timings.parser = Some(timing_str.into());
                     }
-                    val => {
-                        eprintln!("tried to collect timing for unknown solution part: {}", val)
+                    s => {
+                        eprintln!("tried to collect timing for unknown solution part: {}", s)
                     }
                 };
 
@@ -154,6 +132,24 @@ mod bin_runner {
             });
 
         timings
+    }
+
+    fn parse_to_float(s: &str, postfix: &str) -> Option<f64> {
+        s.split(postfix).next()?.parse().ok()
+    }
+
+    fn parse_time(line: &str) -> Option<(&str, f64)> {
+        // for possible time formats, see: https://github.com/rust-lang/rust/blob/1.64.0/library/core/src/time.rs#L1176-L1200
+        let str_timing = line.split("(avg. time:").last()?.split('@').next()?.trim();
+
+        let parsed_timing = match str_timing {
+            s if s.contains("ns") => s.split("ns").next()?.parse::<f64>().ok(),
+            s if s.contains("µs") => parse_to_float(s, "µs").map(|x| x * 1000_f64),
+            s if s.contains("ms") => parse_to_float(s, "ms").map(|x| x * 1000000_f64),
+            s => parse_to_float(s, "s").map(|x| x * 1000000000_f64),
+        }?;
+
+        Some((str_timing, parsed_timing))
     }
 
     /// copied from: https://github.com/rust-lang/rust/blob/1.64.0/library/std/src/macros.rs#L328-L333
@@ -172,8 +168,7 @@ mod bin_runner {
 
     #[cfg(test)]
     mod tests {
-
-        use super::*;
+        use super::parse_exec_time;
 
         #[test]
         fn test_well_formed() {
@@ -219,8 +214,9 @@ mod bin_runner {
     }
 }
 
-mod readme_benchmarks {
-    use std::{fs, io};
+mod readme {
+    use super::{Error, Timings};
+    use std::fs;
 
     static MARKER: &str = "<!--- benchmarking table --->";
 
@@ -229,23 +225,11 @@ mod readme_benchmarks {
         pos_end: usize,
     }
 
-    #[derive(Debug)]
-    pub enum WriteError {
-        ParseError(String),
-        IO(io::Error),
-    }
-
-    impl From<std::io::Error> for WriteError {
-        fn from(e: std::io::Error) -> Self {
-            WriteError::IO(e)
-        }
-    }
-
-    fn locate_table(readme: &str) -> Result<TablePosition, WriteError> {
+    fn locate_table(readme: &str) -> Result<TablePosition, Error> {
         let matches: Vec<_> = readme.match_indices(MARKER).collect();
 
         if matches.len() > 2 {
-            return Err(WriteError::ParseError(
+            return Err(Error::Parser(
                 "{}: too many occurences of marker in README.".into(),
             ));
         }
@@ -253,12 +237,12 @@ mod readme_benchmarks {
         let pos_start = matches
             .first()
             .map(|m| m.0)
-            .ok_or_else(|| WriteError::ParseError("Could not find table start position.".into()))?;
+            .ok_or_else(|| Error::Parser("Could not find table start position.".into()))?;
 
         let pos_end = matches
             .last()
             .map(|m| m.0 + m.1.len())
-            .ok_or_else(|| WriteError::ParseError("Could not find table end position.".into()))?;
+            .ok_or_else(|| Error::Parser("Could not find table end position.".into()))?;
 
         Ok(TablePosition { pos_start, pos_end })
     }
@@ -275,11 +259,10 @@ mod readme_benchmarks {
         ];
 
         timings.into_iter().enumerate().for_each(|(i, timing)| {
-            let day_padded = format!("{:02}", i + 1);
             let path = super::get_path_for_bin(i + 1);
             lines.push(format!(
                 "| [Day {}]({}) | `{}` | `{}` | `{}` |",
-                day_padded,
+                i + 1,
                 path,
                 timing.parser.unwrap_or_else(|| "-".into()),
                 timing.part_1.unwrap_or_else(|| "-".into()),
@@ -294,17 +277,14 @@ mod readme_benchmarks {
         lines.join("\n")
     }
 
-    pub fn update_readme_benchmarks(
-        timings: Vec<super::Timings>,
-        total_millis: f64,
-    ) -> Result<(), WriteError> {
+    pub fn update(timings: Vec<Timings>, total_millis: f64) -> Result<(), Error> {
         let path = "README.md";
-
         let mut readme = String::from_utf8_lossy(&fs::read(path)?).to_string();
 
         let positions = locate_table(&readme)?;
         let table = construct_table("##", timings, total_millis);
         readme.replace_range(positions.pos_start..positions.pos_end, &table);
+
         fs::write(path, &readme)?;
         Ok(())
     }
@@ -321,12 +301,12 @@ fn main() {
         println!("{}Day {}{}", ANSI_BOLD, day, ANSI_RESET);
         println!("------");
 
-        let output = bin_runner::run_solution(day).unwrap();
+        let output = child_commands::run_solution(day).unwrap();
 
         if output.is_empty() {
             println!("Not solved.");
         } else {
-            let val = bin_runner::parse_exec_time(&output);
+            let val = child_commands::parse_exec_time(&output);
             timings.push(val);
         }
     });
@@ -340,7 +320,7 @@ fn main() {
 
     if cfg!(not(debug_assertions)) {
         println!();
-        match update_readme_benchmarks(timings, total_millis) {
+        match readme::update(timings, total_millis) {
             Ok(_) => println!("Successfully updated README with benchmarks."),
             Err(_) => {
                 eprintln!("Failed to update readme with benchmarks.");
