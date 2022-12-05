@@ -21,16 +21,16 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.
 
 | Day | Parser | Part 1 | Part 2 |
 | :---: | :---: | :---: | :---:  |
-| [Day 01](./src/bin/01.rs) | `34.5µs` | `16.0ns` | `5.1µs` |
-| [Day 02](./src/bin/02.rs) | `24.9µs` | `161.0ns` | `4.4µs` |
-| [Day 03](./src/bin/03.rs) | `4.7µs` | `13.6µs` | `12.7µs` |
-| [Day 04](./src/bin/04.rs) | `29.5µs` | `31.0ns` | `49.0ns` |
-| [Day 05](./src/bin/05.rs) | `67.1µs` | `33.6µs` | `33.1µs` |
+| [Day 01](./src/bin/01.rs) | `34.7µs` | `15.0ns` | `5.2µs` |
+| [Day 02](./src/bin/02.rs) | `25.0µs` | `148.0ns` | `4.4µs` |
+| [Day 03](./src/bin/03.rs) | `4.5µs` | `13.8µs` | `13.7µs` |
+| [Day 04](./src/bin/04.rs) | `29.3µs` | `43.0ns` | `34.0ns` |
+| [Day 05](./src/bin/05.rs) | `66.7µs` | `33.2µs` | `33.5µs` |
 
-**Total:** 0.26ms
+**Total: 0.26ms**
 <!--- benchmarking table --->
 
-All solutions are measured (non scientifically) in `cargo run --release` on a `Macbook Air 2020 M1` with `16GB RAM`.
+All solutions are measured (non scientifically) in `cargo run --release` on a `M1 Macbook Air 2020`.
 
 ---
 

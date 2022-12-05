@@ -288,7 +288,7 @@ mod readme_benchmarks {
         });
 
         lines.push("".into());
-        lines.push(format!("**Total:** {:.2}ms", total_millis));
+        lines.push(format!("**Total: {:.2}ms**", total_millis));
         lines.push(MARKER.into());
 
         lines.join("\n")
