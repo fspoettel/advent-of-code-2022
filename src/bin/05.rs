@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 type Stack = Vec<Vec<char>>;
 type Move = (usize, usize, usize);
-type Input<'a> = (Stack, Vec<Move>);
+type Input = (Stack, Vec<Move>);
 
 fn parse(input: &str) -> Input {
     let (stack_str, moves_str) = input.split_once("\n\n").unwrap();

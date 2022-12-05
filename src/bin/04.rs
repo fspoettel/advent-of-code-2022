@@ -1,6 +1,6 @@
 use std::{cmp, ops::Range};
 
-type Input<'a> = Vec<(Range<u8>, Range<u8>)>;
+type Input = Vec<(Range<u8>, Range<u8>)>;
 
 fn parse(input: &str) -> Input {
     input
