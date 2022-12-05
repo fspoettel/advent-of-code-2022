@@ -32,7 +32,7 @@ fn format_duration(duration: &Duration, iterations: u64) -> String {
     format!("(avg. time: {:.2?} / {} samples)", duration, iterations)
 }
 
-pub fn bench<I: Copy, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) -> String {
+pub fn bench<I: Clone, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) -> String {
     let mut stdout = stdout();
 
     print!("> {}benchmarking...{}", ANSI_ITALIC, ANSI_RESET);
@@ -50,7 +50,7 @@ pub fn bench<I: Copy, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) 
 
     for _ in 0..bench_iterations {
         let timer = Instant::now();
-        func(input);
+        func(input.clone());
         timers.push(timer.elapsed());
     }
 
@@ -143,8 +143,8 @@ macro_rules! main {
         fn main() {
             let input = advent_of_code::read_file("inputs", $day);
             let parsed = advent_of_code::parse!(parse, &input);
-            advent_of_code::solve!(1, part_one, &parsed);
-            advent_of_code::solve!(2, part_two, &parsed);
+            advent_of_code::solve!(1, part_one, parsed.clone());
+            advent_of_code::solve!(2, part_two, parsed.clone());
         }
     };
 }

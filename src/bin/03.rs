@@ -8,7 +8,7 @@ fn score_char(code: u8) -> u8 {
     code % 32 + (26 * (code <= 90) as u8)
 }
 
-pub fn part_one(input: &Input) -> Option<u32> {
+pub fn part_one(input: Input) -> Option<u32> {
     let prios = input
         .iter()
         .filter_map(|l| {
@@ -23,7 +23,7 @@ pub fn part_one(input: &Input) -> Option<u32> {
     Some(prios)
 }
 
-pub fn part_two(input: &Input) -> Option<u32> {
+pub fn part_two(input: Input) -> Option<u32> {
     let prios = input
         .chunks(3)
         .filter_map(|chunks| {
@@ -47,13 +47,13 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let result = part_one(&parse(&advent_of_code::read_file("examples", 3)));
+        let result = part_one(parse(&advent_of_code::read_file("examples", 3)));
         assert_eq!(result, Some(157));
     }
 
     #[test]
     fn test_part_two() {
-        let result = part_two(&parse(&advent_of_code::read_file("examples", 3)));
+        let result = part_two(parse(&advent_of_code::read_file("examples", 3)));
         assert_eq!(result, Some(70));
     }
 }

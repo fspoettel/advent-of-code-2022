@@ -18,7 +18,7 @@ fn score_distance(theirs: u32, ours: u32) -> u32 {
     score + ours + 1
 }
 
-pub fn part_one(input: &Input) -> Option<u32> {
+pub fn part_one(input: Input) -> Option<u32> {
     Some(
         input
             .iter()
@@ -27,7 +27,7 @@ pub fn part_one(input: &Input) -> Option<u32> {
     )
 }
 
-pub fn part_two(input: &Input) -> Option<u32> {
+pub fn part_two(input: Input) -> Option<u32> {
     let score = input
         .iter()
         .map(|&(theirs, result)| {
@@ -54,13 +54,13 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let result = part_one(&parse(&advent_of_code::read_file("examples", 2)));
+        let result = part_one(parse(&advent_of_code::read_file("examples", 2)));
         assert_eq!(result, Some(15));
     }
 
     #[test]
     fn test_part_two() {
-        let result = part_two(&parse(&advent_of_code::read_file("examples", 2)));
+        let result = part_two(parse(&advent_of_code::read_file("examples", 2)));
         assert_eq!(result, Some(12));
     }
 }
