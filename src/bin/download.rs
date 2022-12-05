@@ -2,9 +2,9 @@
  * This file contains template code.
  * There is no need to edit this file unless you want to change template functionality.
  */
-use std::io::Write;
 use std::path::PathBuf;
-use std::{env::temp_dir, io, process::Command};
+use std::process::Stdio;
+use std::{env::temp_dir, process::Command};
 use std::{fs, process};
 
 struct Args {
@@ -20,40 +20,60 @@ fn parse_args() -> Result<Args, pico_args::Error> {
     })
 }
 
-fn remove_file(path: &PathBuf) {
+fn remove_dir(path: &PathBuf) {
     #[allow(unused_must_use)]
     {
-        fs::remove_file(path);
+        let dir = match fs::read_dir(path) {
+            Ok(dir) => dir,
+            Err(_) => {
+                return;
+            }
+        };
+
+        for entry in dir {
+            match entry {
+                Ok(entry) => fs::remove_file(entry.path()),
+                Err(_) => continue,
+            };
+        }
+
+        fs::remove_dir(path);
     }
 }
 
 fn exit_with_status(status: i32, path: &PathBuf) -> ! {
-    remove_file(path);
+    remove_dir(path);
     process::exit(status);
 }
 
 fn main() {
     // acquire a temp file path to write aoc-cli output to.
     // aoc-cli expects this file not to be present - delete just in case.
-    let mut tmp_file_path = temp_dir();
-    tmp_file_path.push("aoc_input_tmp");
-    remove_file(&tmp_file_path);
+    let tmp_dir = temp_dir();
+    remove_dir(&tmp_dir);
+
+    let mut input_file_path = tmp_dir.clone();
+    input_file_path.push("aoc_input_tmp");
+
+    let mut puzzle_file_path = tmp_dir.clone();
+    puzzle_file_path.push("aoc_puzzle_tmp");
 
     let args = match parse_args() {
         Ok(args) => args,
         Err(e) => {
             eprintln!("Failed to process arguments: {}", e);
-            exit_with_status(1, &tmp_file_path);
+            exit_with_status(1, &tmp_dir);
         }
     };
 
     let day_padded = format!("{:02}", args.day);
     let input_path = format!("src/inputs/{}.txt", day_padded);
+    let puzzle_path = format!("src/puzzles/{}.md", day_padded);
 
     // check if aoc binary exists and is callable.
     if Command::new("aoc").arg("-V").output().is_err() {
         eprintln!("command \"aoc\" not found or not callable. Try running \"cargo install aoc-cli\" to install it.");
-        exit_with_status(1, &tmp_file_path);
+        exit_with_status(1, &tmp_dir);
     }
 
     let mut cmd_args = vec![];
@@ -65,7 +85,9 @@ fn main() {
 
     cmd_args.append(&mut vec![
         "--input-file".into(),
-        tmp_file_path.to_string_lossy().to_string(),
+        input_file_path.to_string_lossy().to_string(),
+        "--puzzle-file".into(),
+        puzzle_file_path.to_string_lossy().to_string(),
         "--day".into(),
         args.day.to_string(),
         "download".into(),
@@ -73,33 +95,43 @@ fn main() {
 
     println!("Downloading input with >aoc {}", cmd_args.join(" "));
 
-    match Command::new("aoc").args(cmd_args).output() {
+    match Command::new("aoc")
+        .args(cmd_args)
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .output()
+    {
         Ok(cmd_output) => {
-            io::stdout()
-                .write_all(&cmd_output.stdout)
-                .expect("could not write cmd stdout to pipe.");
-            io::stderr()
-                .write_all(&cmd_output.stderr)
-                .expect("could not write cmd stderr to pipe.");
             if !cmd_output.status.success() {
-                exit_with_status(1, &tmp_file_path);
+                exit_with_status(1, &tmp_dir);
             }
         }
         Err(e) => {
             eprintln!("failed to spawn aoc-cli: {}", e);
-            exit_with_status(1, &tmp_file_path);
+            exit_with_status(1, &tmp_dir);
         }
     }
 
-    match fs::copy(&tmp_file_path, &input_path) {
+    match fs::copy(&input_file_path, &input_path) {
         Ok(_) => {
             println!("---");
             println!("🎄 Successfully wrote input to \"{}\".", &input_path);
-            exit_with_status(0, &tmp_file_path);
         }
         Err(e) => {
             eprintln!("could not copy downloaded input to input file: {}", e);
-            exit_with_status(1, &tmp_file_path);
+            exit_with_status(1, &tmp_dir);
         }
     }
+
+    match fs::copy(&puzzle_file_path, &puzzle_path) {
+        Ok(_) => {
+            println!("🎄 Successfully wrote puzzle to \"{}\".", &puzzle_path);
+        }
+        Err(e) => {
+            eprintln!("could not copy downloaded puzzle to puzzle file: {}", e);
+            exit_with_status(1, &tmp_dir);
+        }
+    }
+
+    exit_with_status(0, &tmp_dir);
 }
