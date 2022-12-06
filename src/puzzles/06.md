@@ -34,8 +34,31 @@ Here are a few more examples:
 
 *How many characters need to be processed before the first start-of-packet marker is detected?*
 
-To begin, [get your puzzle input](6/input).
+Your puzzle answer was `1802`.
 
-Answer:
+\--- Part Two ---
+----------
 
-You can also [Shareon [Twitter](https://twitter.com/intent/tweet?text=%22Tuning+Trouble%22+%2D+Day+6+%2D+Advent+of+Code+2022&url=https%3A%2F%2Fadventofcode%2Ecom%2F2022%2Fday%2F6&related=ericwastl&hashtags=AdventOfCode) [Mastodon](javascript:void(0);)] this puzzle.
+Your device's communication system is correctly detecting packets, but still isn't working. It looks like it also needs to look for *messages*.
+
+A *start-of-message marker* is just like a start-of-packet marker, except it consists of *14 distinct characters* rather than 4.
+
+Here are the first positions of start-of-message markers for all of the above examples:
+
+* `mjqjpqmgbljsphdztnvjfqwrcgsmlb`: first marker after character `*19*`
+* `bvwbjplbgvbhsrlpgdmjqwftvncz`: first marker after character `*23*`
+* `nppdvjthqldpwncqszvftbrmjlhg`: first marker after character `*23*`
+* `nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg`: first marker after character `*29*`
+* `zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw`: first marker after character `*26*`
+
+*How many characters need to be processed before the first start-of-message marker is detected?*
+
+Your puzzle answer was `3551`.
+
+Both parts of this puzzle are complete! They provide two gold stars: \*\*
+
+At this point, you should [return to your Advent calendar](/2022) and try another puzzle.
+
+If you still want to see it, you can [get your puzzle input](6/input).
+
+You can also [Shareon [Twitter](https://twitter.com/intent/tweet?text=I%27ve+completed+%22Tuning+Trouble%22+%2D+Day+6+%2D+Advent+of+Code+2022&url=https%3A%2F%2Fadventofcode%2Ecom%2F2022%2Fday%2F6&related=ericwastl&hashtags=AdventOfCode) [Mastodon](javascript:void(0);)] this puzzle.

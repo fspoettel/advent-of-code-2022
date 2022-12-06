@@ -56,5 +56,15 @@ mod tests {
     #[test]
     fn test_part_two() {
         assert_eq!(part_two(parse("mjqjpqmgbljsphdztnvjfqwrcgsmlb")), Some(19));
+        assert_eq!(part_two(parse("bvwbjplbgvbhsrlpgdmjqwftvncz")), Some(23));
+        assert_eq!(part_two(parse("nppdvjthqldpwncqszvftbrmjlhg")), Some(23));
+        assert_eq!(
+            part_two(parse("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg")),
+            Some(29)
+        );
+        assert_eq!(
+            part_two(parse("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw")),
+            Some(26)
+        );
     }
 }
