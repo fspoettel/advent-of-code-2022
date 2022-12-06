@@ -1,7 +1,7 @@
 [alias]
-scaffold = "run --bin scaffold -- "
-download = "run --bin download -- "
-read = "run --bin read -- "
+scaffold = "run --bin scaffold --quiet --release -- "
+download = "run --bin download --quiet --release -- "
+read = "run --bin read --quiet --release -- "
 
 solve = "run --bin"
 all = "run"
