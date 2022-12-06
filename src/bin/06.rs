@@ -24,6 +24,7 @@ fn find_marker(chars: &[char], window_size: usize) -> Option<usize> {
 }
 
 pub fn part_one(input: Input) -> Option<usize> {
+    // using simple compares here is ~5x faster than this looped solution.
     find_marker(&input, 4)
 }
 
