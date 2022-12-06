@@ -38,33 +38,22 @@ advent_of_code::main!(6);
 mod tests {
     use super::*;
 
+    fn test_answer(func: &dyn Fn(Input) -> Option<usize>, answers: &[usize]) {
+        advent_of_code::read_file("examples", 6)
+            .lines()
+            .enumerate()
+            .for_each(|(i, l)| {
+                assert_eq!(func(parse(l)), Some(answers[i]));
+            })
+    }
+
     #[test]
     fn test_part_one() {
-        assert_eq!(part_one(parse("mjqjpqmgbljsphdztnvjfqwrcgsmlb")), Some(7));
-        assert_eq!(part_one(parse("bvwbjplbgvbhsrlpgdmjqwftvncz")), Some(5));
-        assert_eq!(part_one(parse("nppdvjthqldpwncqszvftbrmjlhg")), Some(6));
-        assert_eq!(
-            part_one(parse("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg")),
-            Some(10)
-        );
-        assert_eq!(
-            part_one(parse("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw")),
-            Some(11)
-        );
+        test_answer(&part_one, &[7, 5, 6, 10, 11]);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(part_two(parse("mjqjpqmgbljsphdztnvjfqwrcgsmlb")), Some(19));
-        assert_eq!(part_two(parse("bvwbjplbgvbhsrlpgdmjqwftvncz")), Some(23));
-        assert_eq!(part_two(parse("nppdvjthqldpwncqszvftbrmjlhg")), Some(23));
-        assert_eq!(
-            part_two(parse("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg")),
-            Some(29)
-        );
-        assert_eq!(
-            part_two(parse("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw")),
-            Some(26)
-        );
+        test_answer(&part_two, &[19, 23, 23, 29, 26]);
     }
 }
