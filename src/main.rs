@@ -123,9 +123,7 @@ mod child_commands {
                     "parser" => {
                         timings.parser = Some(timing_str.into());
                     }
-                    s => {
-                        eprintln!("tried to collect timing for unknown solution part: {}", s)
-                    }
+                    _ => {}
                 };
 
                 timings.total_nanos += nanos;

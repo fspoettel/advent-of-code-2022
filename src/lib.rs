@@ -112,11 +112,21 @@ macro_rules! parse {
         let base_time = timer.elapsed();
 
         if $input != "" {
-            print!("parser: ");
-            let duration = match cfg!(debug_assertions) {
+            let is_debug = cfg!(debug_assertions);
+
+            if !is_debug {
+                print!("parser: ");
+            }
+
+            let duration = match is_debug {
                 true => format_duration(&base_time, 1),
                 false => advent_of_code::bench($parser, $input, &base_time),
             };
+
+            if !is_debug {
+                print!("\r")
+            }
+
             println!("parser: ✓ {}", duration);
         }
 
@@ -138,17 +148,26 @@ macro_rules! solve {
 
         match result {
             Some(result) => {
-                print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
+                let is_debug = cfg!(debug_assertions);
 
-                let duration = match cfg!(debug_assertions) {
+                if !is_debug {
+                    print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
+                }
+
+                let duration = match is_debug {
                     true => format_duration(&base_time, 1),
                     false => advent_of_code::bench($solver, $input, &base_time),
                 };
+
+                if !is_debug {
+                    print!("\r")
+                }
 
                 println!(
                     "part {}: {}{}{} {}",
                     $part, ANSI_BOLD, result, ANSI_RESET, duration
                 );
+
                 submit_result(result, $day, $part);
             }
             None => {
