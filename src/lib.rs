@@ -5,8 +5,10 @@
  */
 use std::cmp;
 use std::env;
+use std::fmt::Display;
 use std::fs;
 use std::io::{stdout, Write};
+use std::process;
 use std::time::{Duration, Instant};
 
 pub mod helpers;
@@ -26,7 +28,7 @@ fn average_duration(numbers: &[Duration]) -> u128 {
     numbers.iter().map(|d| d.as_nanos()).sum::<u128>() / numbers.len() as u128
 }
 
-fn format_duration(duration: &Duration, iterations: u64) -> String {
+pub fn format_duration(duration: &Duration, iterations: u64) -> String {
     format!("(avg. time: {:.1?} @ {} samples)", duration, iterations)
 }
 
@@ -59,10 +61,50 @@ pub fn bench<I: Clone, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration)
     format_duration(&avg_time, bench_iterations as u64)
 }
 
+pub fn submit_result<T: Display>(result: T, day: u8, part: u8) {
+    let args: Vec<String> = env::args().collect();
+    if !args.contains(&"--submit".into()) {
+        return;
+    }
+
+    if args.len() < 3 {
+        eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
+        process::exit(1);
+    }
+
+    let part_index = args.iter().position(|x| x == "--submit").unwrap() + 1;
+
+    let part_submit = match args[part_index].parse::<u8>() {
+        Ok(x) => x,
+        Err(_) => {
+            eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
+            process::exit(1);
+        }
+    };
+
+    if part_submit != part {
+        return;
+    }
+
+    if cfg!(debug_assertions) {
+        eprintln!("--submit has no effect in debug mode.");
+        return;
+    }
+
+    println!("Submitting puzzle answer for part {}...", part);
+
+    if aoc_cli::check().is_err() {
+        eprintln!("command \"aoc\" not found or not callable. Try running \"cargo install aoc-cli\" to install it.");
+        process::exit(1);
+    }
+
+    aoc_cli::submit(day, part, result).unwrap();
+}
+
 #[macro_export]
 macro_rules! parse {
     ($parser:ident, $input:expr) => {{
-        use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
+        use advent_of_code::{format_duration, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
         use std::time::Instant;
 
         let timer = Instant::now();
@@ -71,8 +113,11 @@ macro_rules! parse {
 
         if $input != "" {
             print!("parser: ");
-            let time = advent_of_code::bench($parser, $input, &base_time);
-            println!("parser: ✓ {}", time);
+            let duration = match cfg!(debug_assertions) {
+                true => format_duration(&base_time, 1),
+                false => advent_of_code::bench($parser, $input, &base_time),
+            };
+            println!("parser: ✓ {}", duration);
         }
 
         result
@@ -82,11 +127,10 @@ macro_rules! parse {
 #[macro_export]
 macro_rules! solve {
     ($day:expr, $part:expr, $solver:ident, $input:expr) => {{
-        use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET,aoc_cli};
-        use std::fmt::Display;
+        use advent_of_code::{
+            aoc_cli, format_duration, submit_result, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET,
+        };
         use std::time::Instant;
-        use std::env;
-        use std::process;
 
         let timer = Instant::now();
         let result = $solver($input);
@@ -95,42 +139,17 @@ macro_rules! solve {
         match result {
             Some(result) => {
                 print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
+
+                let duration = match cfg!(debug_assertions) {
+                    true => format_duration(&base_time, 1),
+                    false => advent_of_code::bench($solver, $input, &base_time),
+                };
+
                 println!(
                     "part {}: {}{}{} {}",
-                    $part,
-                    ANSI_BOLD,
-                    result,
-                    ANSI_RESET,
-                    advent_of_code::bench($solver, $input, &base_time)
+                    $part, ANSI_BOLD, result, ANSI_RESET, duration
                 );
-
-                let args: Vec<String> = env::args().collect();
-
-                if args.contains(&"--submit".into()) {
-                    if aoc_cli::check().is_err() {
-                        eprintln!("command \"aoc\" not found or not callable. Try running \"cargo install aoc-cli\" to install it.");
-                        process::exit(1);
-                    }
-
-                    if args.len() < 3 {
-                        eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
-                        process::exit(1);
-                    }
-
-                    let part_index = args.iter().position(|x| x == "--submit").unwrap() + 1;
-                    let part_submit =  match args[part_index].parse::<u8>() {
-                        Ok(x) => x,
-                        Err(_) => {
-                            eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
-                            process::exit(1);
-                        }
-                    };
-
-                    if part_submit == $part {
-                        println!("Submitting puzzle answer for part {}...", $part);
-                        aoc_cli::submit($day, $part, result).unwrap();
-                    }
-                }
+                submit_result(result, $day, $part);
             }
             None => {
                 print!("not solved.\n");
