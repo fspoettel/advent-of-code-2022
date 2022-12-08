@@ -8,6 +8,7 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+hashbrown = "0.13.1"
 pico-args = "0.5.0"
 indextree = "4.5.0"
 itertools = "0.10.5"
