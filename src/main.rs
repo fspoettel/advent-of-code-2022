@@ -25,6 +25,46 @@ impl From<std::io::Error> for Error {
     }
 }
 
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+
+    let mut timings = vec![];
+
+    (1..=25).enumerate().for_each(|(i, day)| {
+        if i > 0 {
+            println!();
+        }
+
+        println!("{}Day {}{}", ANSI_BOLD, day, ANSI_RESET);
+        println!("------");
+
+        let output = child_commands::run_solution(day).unwrap();
+
+        if output.is_empty() {
+            println!("Not solved.");
+        } else {
+            let val = child_commands::parse_exec_time(&output);
+            timings.push(val);
+        }
+    });
+
+    let total_millis = timings.iter().map(|x| x.total_nanos).sum::<f64>() / 1000000_f64;
+
+    println!(
+        "\n{}Total:{} {}{:.2}ms{}",
+        ANSI_BOLD, ANSI_RESET, ANSI_ITALIC, total_millis, ANSI_RESET
+    );
+
+    if cfg!(not(debug_assertions)) && args.contains(&"--time".into()) {
+        match readme::update(timings, total_millis) {
+            Ok(_) => println!("Successfully updated README with benchmarks."),
+            Err(_) => {
+                eprintln!("Failed to update readme with benchmarks.");
+            }
+        }
+    }
+}
+
 pub fn get_path_for_bin(day: usize) -> String {
     let day_padded = format!("{:02}", day);
     format!("./src/bin/{}.rs", day_padded)
@@ -285,46 +325,5 @@ mod readme {
 
         fs::write(path, &readme)?;
         Ok(())
-    }
-}
-
-fn main() {
-    let args: Vec<String> = std::env::args().collect();
-
-    let mut timings = vec![];
-
-    (1..=25).enumerate().for_each(|(i, day)| {
-        if i > 0 {
-            println!();
-        }
-
-        println!("{}Day {}{}", ANSI_BOLD, day, ANSI_RESET);
-        println!("------");
-
-        let output = child_commands::run_solution(day).unwrap();
-
-        if output.is_empty() {
-            println!("Not solved.");
-        } else {
-            let val = child_commands::parse_exec_time(&output);
-            timings.push(val);
-        }
-    });
-
-    let total_millis = timings.iter().map(|x| x.total_nanos).sum::<f64>() / 1000000_f64;
-
-    println!(
-        "\n{}Total:{} {}{:.2}ms{}",
-        ANSI_BOLD, ANSI_RESET, ANSI_ITALIC, total_millis, ANSI_RESET
-    );
-
-    if cfg!(not(debug_assertions)) && args.contains(&"--time".into()) {
-        println!();
-        match readme::update(timings, total_millis) {
-            Ok(_) => println!("Successfully updated README with benchmarks."),
-            Err(_) => {
-                eprintln!("Failed to update readme with benchmarks.");
-            }
-        }
     }
 }

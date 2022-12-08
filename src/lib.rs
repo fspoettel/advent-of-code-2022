@@ -19,6 +19,64 @@ pub fn read_file(folder: &str, day: u8) -> String {
     f.expect("could not open input file")
 }
 
+#[macro_export]
+macro_rules! parse {
+    ($parser:ident, $input:expr) => {{
+        use advent_of_code::{runner, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
+        use std::time::Instant;
+
+        let (result, duration) = runner::run_timed($parser, $input, |_| {
+            print!("parser: ");
+        });
+
+        print!("\r");
+        println!("parser: ✓ {}", duration);
+        result
+    }};
+}
+
+#[macro_export]
+macro_rules! solve {
+    ($day:expr, $part:expr, $solver:ident, $input:expr) => {{
+        use advent_of_code::{aoc_cli, runner, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
+
+        let (result, duration) = runner::run_timed($solver, $input, |result| {
+            if let Some(result) = result {
+                print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
+            } else {
+                print!("part {}: ", $part);
+            }
+        });
+
+        match result {
+            Some(result) => {
+                print!("\r");
+                println!(
+                    "part {}: {}{}{} {}",
+                    $part, ANSI_BOLD, result, ANSI_RESET, duration
+                );
+                runner::submit_result(result, $day, $part);
+            }
+            None => {
+                print!("\r");
+                println!("part {}: not solved.", $part);
+            }
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! main {
+    ($day:expr) => {
+        fn main() {
+            let input = advent_of_code::read_file("inputs", $day);
+            let parsed = advent_of_code::parse!(parse, &input);
+            advent_of_code::solve!($day, 1, part_one, parsed.clone());
+            advent_of_code::solve!($day, 2, part_two, parsed.clone());
+        }
+    };
+}
+
 pub mod runner {
     use super::{aoc_cli, ANSI_ITALIC, ANSI_RESET};
     use std::fmt::Display;
@@ -117,64 +175,6 @@ pub mod runner {
 
         aoc_cli::submit(day, part, result).unwrap();
     }
-}
-
-#[macro_export]
-macro_rules! parse {
-    ($parser:ident, $input:expr) => {{
-        use advent_of_code::{runner, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
-        use std::time::Instant;
-
-        let (result, duration) = runner::run_timed($parser, $input, |_| {
-            print!("parser: ");
-        });
-
-        print!("\r");
-        println!("parser: ✓ {}", duration);
-        result
-    }};
-}
-
-#[macro_export]
-macro_rules! solve {
-    ($day:expr, $part:expr, $solver:ident, $input:expr) => {{
-        use advent_of_code::{aoc_cli, runner, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
-
-        let (result, duration) = runner::run_timed($solver, $input, |result| {
-            if let Some(result) = result {
-                print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
-            } else {
-                print!("part {}: ", $part);
-            }
-        });
-
-        match result {
-            Some(result) => {
-                print!("\r");
-                println!(
-                    "part {}: {}{}{} {}",
-                    $part, ANSI_BOLD, result, ANSI_RESET, duration
-                );
-                runner::submit_result(result, $day, $part);
-            }
-            None => {
-                print!("\r");
-                println!("part {}: not solved.", $part);
-            }
-        }
-    }};
-}
-
-#[macro_export]
-macro_rules! main {
-    ($day:expr) => {
-        fn main() {
-            let input = advent_of_code::read_file("inputs", $day);
-            let parsed = advent_of_code::parse!(parse, &input);
-            advent_of_code::solve!($day, 1, part_one, parsed.clone());
-            advent_of_code::solve!($day, 2, part_two, parsed.clone());
-        }
-    };
 }
 
 pub mod aoc_cli {
