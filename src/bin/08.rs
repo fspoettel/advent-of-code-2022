@@ -1,35 +1,47 @@
-use advent_of_code::helpers::{Direction, Grid};
+use advent_of_code::helpers::{Direction, SimpleGrid};
 
-type Input<'a> = Grid<u32>;
+type Input<'a> = SimpleGrid<u32>;
+
+static DIRECTIONS: [Direction; 4] = [
+    Direction::North,
+    Direction::East,
+    Direction::South,
+    Direction::West,
+];
 
 fn parse(input: &str) -> Input {
-    Grid::from_str(input, &|x| x.to_digit(10).unwrap(), None)
+    SimpleGrid::from_str(input, &|x| x.to_digit(10).unwrap())
 }
 
 pub fn part_one(grid: Input) -> Option<usize> {
     Some(
-        grid.points
+        grid.points()
             .iter()
-            .filter(|(a, size)| {
+            .filter(|a| {
+                let size = grid.get(a);
                 grid.is_edge(a)
-                    || Direction::iter()
-                        .any(|dir| grid.walk(a, dir).all(|b| grid.get(&b).unwrap() < size))
+                    || DIRECTIONS
+                        .iter()
+                        .any(|dir| grid.walk(a, dir).all(|b| grid.get(&b) < size))
             })
             .count(),
     )
 }
 
 pub fn part_two(grid: Input) -> Option<isize> {
-    grid.points
+    grid.points()
         .iter()
-        .filter(|(p, _)| !grid.is_edge(p))
-        .map(|(point, size)| {
-            Direction::iter()
+        .filter(|p| !grid.is_edge(p))
+        .map(|a| {
+            let size = grid.get(a);
+
+            DIRECTIONS
+                .iter()
                 .map(|dir| {
                     let mut points = 0;
-                    for point in grid.walk(point, dir) {
+                    for b in grid.walk(a, dir) {
                         points += 1;
-                        if grid.get(&point).unwrap() >= size {
+                        if grid.get(&b) >= size {
                             break;
                         }
                     }
