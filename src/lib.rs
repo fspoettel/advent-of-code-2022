@@ -12,6 +12,7 @@ pub const ANSI_ITALIC: &str = "\x1b[3m";
 pub const ANSI_BOLD: &str = "\x1b[1m";
 pub const ANSI_RESET: &str = "\x1b[0m";
 
+/// Helper function that reads a text file to a string.
 pub fn read_file(folder: &str, day: u8) -> String {
     let cwd = env::current_dir().unwrap();
     let filepath = cwd.join("src").join(folder).join(format!("{:02}.txt", day));
@@ -19,6 +20,8 @@ pub fn read_file(folder: &str, day: u8) -> String {
     f.expect("could not open input file")
 }
 
+/// parse! wraps a parsing function with formatted console output.
+/// When run with --release, parser code will be benchmarked.
 #[macro_export]
 macro_rules! parse {
     ($parser:ident, $input:expr) => {{
@@ -35,6 +38,8 @@ macro_rules! parse {
     }};
 }
 
+/// solve! wraps a solution part with formatted console output.
+/// When run with --release, parser code will be benchmarked.
 #[macro_export]
 macro_rules! solve {
     ($day:expr, $part:expr, $solver:ident, $input:expr) => {{
@@ -65,6 +70,7 @@ macro_rules! solve {
     }};
 }
 
+/// main! produced a block setting up the input, parse! and solve! for each part.
 #[macro_export]
 macro_rules! main {
     ($day:expr) => {
@@ -77,6 +83,7 @@ macro_rules! main {
     };
 }
 
+/// Encapsulates code that interacts with solution functions.
 pub mod runner {
     use super::{aoc_cli, ANSI_ITALIC, ANSI_RESET};
     use std::fmt::Display;
@@ -88,7 +95,7 @@ pub mod runner {
         numbers.iter().map(|d| d.as_nanos()).sum::<u128>() / numbers.len() as u128
     }
 
-    pub fn format_duration(duration: &Duration, iterations: u64) -> String {
+    fn format_duration(duration: &Duration, iterations: u64) -> String {
         format!("(avg. time: {:.1?} @ {} samples)", duration, iterations)
     }
 
@@ -177,6 +184,7 @@ pub mod runner {
     }
 }
 
+/// Wrapper module around the "aoc-cli" CLI.
 pub mod aoc_cli {
     use std::{
         fmt::Display,

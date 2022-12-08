@@ -26,8 +26,6 @@ impl From<std::io::Error> for Error {
 }
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-
     let mut timings = vec![];
 
     (1..=25).enumerate().for_each(|(i, day)| {
@@ -55,7 +53,7 @@ fn main() {
         ANSI_BOLD, ANSI_RESET, ANSI_ITALIC, total_millis, ANSI_RESET
     );
 
-    if cfg!(not(debug_assertions)) && args.contains(&"--time".into()) {
+    if cfg!(not(debug_assertions)) && std::env::args().any(|x| x == "--time") {
         match readme::update(timings, total_millis) {
             Ok(_) => println!("Successfully updated README with benchmarks."),
             Err(_) => {
