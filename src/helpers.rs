@@ -17,6 +17,7 @@ pub struct SimpleGrid<T> {
 
 impl<T> SimpleGrid<T> {
     pub fn from_str(input: &str, parse: &dyn Fn(char) -> T) -> Self {
+        // map lines into a nested list, applying parser to each item.
         let data: Vec<Vec<T>> = input
             .trim()
             .lines()
@@ -76,22 +77,29 @@ impl<T> Iterator for WalkingIterator<'_, T> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let x = match self.direction {
-            Direction::West => self.current.x.checked_sub(1),
-            Direction::East => Some(self.current.x + 1),
-            _ => Some(self.current.x),
-        }?;
+        let next_point = match self.direction {
+            Direction::North => Point {
+                x: self.current.x,
+                y: self.current.y.checked_sub(1)?,
+            },
+            Direction::West => Point {
+                x: self.current.x.checked_sub(1)?,
+                y: self.current.y,
+            },
+            Direction::South => Point {
+                x: self.current.x,
+                y: self.current.y + 1,
+            },
+            Direction::East => Point {
+                x: self.current.x + 1,
+                y: self.current.y,
+            },
+        };
 
-        let y = match self.direction {
-            Direction::North => self.current.y.checked_sub(1),
-            Direction::South => Some(self.current.y + 1),
-            _ => Some(self.current.y),
-        }?;
-
-        if x > self.grid.max_x || y > self.grid.max_y {
+        if next_point.x > self.grid.max_x || next_point.y > self.grid.max_y {
             None
         } else {
-            self.current = Point { x, y };
+            self.current = next_point;
             Some(self.current.clone())
         }
     }

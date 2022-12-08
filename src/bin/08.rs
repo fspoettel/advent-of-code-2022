@@ -17,12 +17,18 @@ pub fn part_one(grid: Input) -> Option<usize> {
     Some(
         grid.points()
             .iter()
-            .filter(|a| {
-                let size = grid.get(a);
-                grid.is_edge(a)
-                    || DIRECTIONS
-                        .iter()
-                        .any(|dir| grid.walk(a, dir).all(|b| grid.get(&b) < size))
+            .filter(|point| {
+                if grid.is_edge(point) {
+                    true
+                } else {
+                    let size = grid.get(point);
+
+                    DIRECTIONS.iter().any(|dir| {
+                        // walk line of sight until one is larger than tree.
+                        grid.walk(point, dir)
+                            .all(|point_b| grid.get(&point_b) < size)
+                    })
+                }
             })
             .count(),
     )
@@ -31,21 +37,22 @@ pub fn part_one(grid: Input) -> Option<usize> {
 pub fn part_two(grid: Input) -> Option<isize> {
     grid.points()
         .iter()
-        .filter(|p| !grid.is_edge(p))
-        .map(|a| {
-            let size = grid.get(a);
+        .filter(|point| !grid.is_edge(point))
+        .map(|point| {
+            let size = grid.get(point);
 
             DIRECTIONS
                 .iter()
                 .map(|dir| {
-                    let mut points = 0;
-                    for b in grid.walk(a, dir) {
-                        points += 1;
-                        if grid.get(&b) >= size {
+                    let mut in_line_of_sight = 0;
+                    // walk line of sight until one is larger than tree.
+                    for point_b in grid.walk(point, dir) {
+                        in_line_of_sight += 1;
+                        if grid.get(&point_b) >= size {
                             break;
                         }
                     }
-                    points
+                    in_line_of_sight
                 })
                 .product()
         })

@@ -23,16 +23,16 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.
 
 | Day | Parser | Part 1 | Part 2 |
 | :---: | :---: | :---: | :---:  |
-| [Day 1](./src/bin/01.rs) | `34.5µs` | `16.0ns` | `5.2µs` |
-| [Day 2](./src/bin/02.rs) | `25.1µs` | `124.0ns` | `5.5µs` |
-| [Day 3](./src/bin/03.rs) | `4.9µs` | `15.1µs` | `12.8µs` |
-| [Day 4](./src/bin/04.rs) | `52.9µs` | `29.0ns` | `29.0ns` |
-| [Day 5](./src/bin/05.rs) | `67.9µs` | `35.6µs` | `37.8µs` |
-| [Day 6](./src/bin/06.rs) | `2.8µs` | `10.3µs` | `35.6µs` |
-| [Day 7](./src/bin/07.rs) | `73.0µs` | `116.0ns` | `232.0ns` |
-| [Day 8](./src/bin/08.rs) | `36.5µs` | `232.4µs` | `481.4µs` |
+| [Day 1](./src/bin/01.rs) | `36.4µs` | `16.0ns` | `5.4µs` |
+| [Day 2](./src/bin/02.rs) | `24.7µs` | `161.0ns` | `5.1µs` |
+| [Day 3](./src/bin/03.rs) | `4.6µs` | `14.1µs` | `13.6µs` |
+| [Day 4](./src/bin/04.rs) | `38.7µs` | `31.0ns` | `30.0ns` |
+| [Day 5](./src/bin/05.rs) | `71.3µs` | `35.4µs` | `34.9µs` |
+| [Day 6](./src/bin/06.rs) | `2.8µs` | `10.6µs` | `40.3µs` |
+| [Day 7](./src/bin/07.rs) | `71.5µs` | `116.0ns` | `234.0ns` |
+| [Day 8](./src/bin/08.rs) | `36.6µs` | `235.4µs` | `520.0µs` |
 
-**Total: 1.17ms**
+**Total: 1.20ms**
 <!--- benchmarking table --->
 
 All solutions are measured (nonscientifically) via `cargo run --release` on a _M1 Macbook Air 2020_.
