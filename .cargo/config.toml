@@ -5,6 +5,7 @@ read = "run --bin read --quiet --release -- "
 
 solve = "run --bin solve --quiet --release -- "
 all = "run"
+time = "run --release -- --time"
 
 [env]
 AOC_YEAR = "2022"
