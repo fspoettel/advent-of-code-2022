@@ -1,4 +1,4 @@
-use advent_of_code::helpers::{Direction, SimpleGrid};
+use advent_of_code::helpers::{grid_utils::Direction, simple_grid::SimpleGrid};
 
 type Input<'a> = SimpleGrid<u32>;
 

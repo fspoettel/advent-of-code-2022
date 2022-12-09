@@ -1,12 +1,4 @@
-/*
- * Use this file if you want to extract helpers from your solutions.
- * Example import from this file: `use advent_of_code::helpers::example_fn;`.
- */
-#[derive(Clone)]
-pub struct Point {
-    pub x: usize,
-    pub y: usize,
-}
+use super::grid_utils::{Direction, Point};
 
 #[derive(Clone)]
 pub struct SimpleGrid<T> {
@@ -36,7 +28,10 @@ impl<T> SimpleGrid<T> {
 
         for y in 0..=self.max_y {
             for x in 0..=self.max_x {
-                points.push(Point { x, y })
+                points.push(Point {
+                    x: x as isize,
+                    y: y as isize,
+                })
             }
         }
 
@@ -44,11 +39,14 @@ impl<T> SimpleGrid<T> {
     }
 
     pub fn get(&self, point: &Point) -> &T {
-        &self.data[point.y][point.x]
+        &self.data[point.y as usize][point.x as usize]
     }
 
     pub fn is_edge(&self, point: &Point) -> bool {
-        point.x == 0 || point.y == 0 || point.x == self.max_x || point.y == self.max_y
+        point.x == 0
+            || point.y == 0
+            || point.x as usize == self.max_x
+            || point.y as usize == self.max_y
     }
 
     pub fn walk<'a>(&'a self, current: &'a Point, direction: &'a Direction) -> WalkingIterator<T> {
@@ -58,13 +56,6 @@ impl<T> SimpleGrid<T> {
             direction,
         }
     }
-}
-
-pub enum Direction {
-    North,
-    East,
-    South,
-    West,
 }
 
 pub struct WalkingIterator<'a, T> {
@@ -77,26 +68,13 @@ impl<T> Iterator for WalkingIterator<'_, T> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let next_point = match self.direction {
-            Direction::North => Point {
-                x: self.current.x,
-                y: self.current.y.checked_sub(1)?,
-            },
-            Direction::West => Point {
-                x: self.current.x.checked_sub(1)?,
-                y: self.current.y,
-            },
-            Direction::South => Point {
-                x: self.current.x,
-                y: self.current.y + 1,
-            },
-            Direction::East => Point {
-                x: self.current.x + 1,
-                y: self.current.y,
-            },
-        };
+        let next_point = self.current.get_neighbour(self.direction, 1);
 
-        if next_point.x > self.grid.max_x || next_point.y > self.grid.max_y {
+        if next_point.x < 0
+            || next_point.y < 0
+            || next_point.x as usize > self.grid.max_x
+            || next_point.y as usize > self.grid.max_y
+        {
             None
         } else {
             self.current = next_point;
