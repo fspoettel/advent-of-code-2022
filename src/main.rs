@@ -5,31 +5,14 @@
 use advent_of_code::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
 use std::io;
 
-pub struct Timings {
-    part_1: Option<String>,
-    part_2: Option<String>,
-    parser: Option<String>,
-    total_nanos: f64,
-}
-
-#[derive(Debug)]
-pub enum Error {
-    BrokenPipe,
-    Parser(String),
-    IO(io::Error),
-}
-
-impl From<std::io::Error> for Error {
-    fn from(e: std::io::Error) -> Self {
-        Error::IO(e)
-    }
-}
-
+/// The main executable runs all solutions in succession.
+/// When `--release` is passed, each solution is benched.
+/// When `--time` is passed, the output of the benchmark is written to the readme.
 fn main() {
     let mut timings = vec![];
 
-    (1..=25).enumerate().for_each(|(i, day)| {
-        if i > 0 {
+    (1..=25).for_each(|day| {
+        if day > 1 {
             println!();
         }
 
@@ -63,11 +46,33 @@ fn main() {
     }
 }
 
+pub struct Timings {
+    part_1: Option<String>,
+    part_2: Option<String>,
+    parser: Option<String>,
+    total_nanos: f64,
+}
+
+#[derive(Debug)]
+pub enum Error {
+    BrokenPipe,
+    Parser(String),
+    IO(io::Error),
+}
+
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Error::IO(e)
+    }
+}
+
 pub fn get_path_for_bin(day: usize) -> String {
     let day_padded = format!("{:02}", day);
     format!("./src/bin/{}.rs", day_padded)
 }
 
+/// All solutions live in isolated binaries.
+/// This module encapsulates interaction with these binaries, both invoking them as well as parsing the timing output.
 mod child_commands {
     use super::{get_path_for_bin, Error};
     use std::{
@@ -250,6 +255,8 @@ mod child_commands {
     }
 }
 
+/// Module that updates the readme me with timing information.
+/// The approach taken is similar to how `aoc-readme-stars` handles this.
 mod readme {
     use super::{Error, Timings};
     use std::fs;
