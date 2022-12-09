@@ -9,5 +9,6 @@ publish = false
 
 [dependencies]
 pico-args = "0.5.0"
+hashbrown = "0.13.1"
 indextree = "4.5.0"
 itertools = "0.10.5"

@@ -28,9 +28,8 @@ impl Point {
     }
 
     /// Get point x steps away in a given direction.
-    pub fn get_neighbour(&mut self, direction: &Direction, steps: usize) -> Self {
-        let steps = steps as isize;
-
+    #[inline(always)]
+    pub fn get_neighbour(&self, direction: &Direction, steps: isize) -> Self {
         match direction {
             Direction::North => Self {
                 x: self.x,
