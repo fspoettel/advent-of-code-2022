@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use std::collections::VecDeque;
 
-type Input<'a> = VecDeque<Op>;
+type Input = VecDeque<Op>;
 
 #[derive(Clone)]
 pub enum Op {
@@ -12,7 +12,7 @@ pub enum Op {
 #[derive(Clone)]
 pub struct Task {
     op: Op,
-    after: usize,
+    after: i32,
 }
 
 fn parse(input: &str) -> Input {
@@ -34,7 +34,7 @@ pub fn part_one(mut stack: Input) -> Option<i32> {
 
     work_loop(&mut stack, |cycle, value| {
         if cycle == 20 || cycle % 40 == 20 {
-            signal_strengths.push(cycle as i32 * value);
+            signal_strengths.push(cycle * value);
         }
     });
 
@@ -45,8 +45,8 @@ pub fn part_two(mut stack: Input) -> Option<String> {
     let mut pixels = vec![];
 
     work_loop(&mut stack, |cycle, value| {
-        let cycle = (cycle - 1) as i32 % 40;
-        if cycle == value || cycle == value - 1 || cycle == value + 1 {
+        let col = (cycle - 1) % 40;
+        if col >= value - 1 && col <= value + 1 {
             pixels.push('#');
         } else {
             pixels.push('.')
@@ -56,7 +56,7 @@ pub fn part_two(mut stack: Input) -> Option<String> {
     Some(pixels.chunks(40).map(String::from_iter).join("\n"))
 }
 
-fn work_loop(stack: &mut Input, mut callback: impl FnMut(usize, i32)) {
+fn work_loop(stack: &mut Input, mut callback: impl FnMut(i32, i32)) {
     let mut value = 1;
     let mut cycle = 1;
     let mut task: Option<Task> = None;
@@ -65,17 +65,15 @@ fn work_loop(stack: &mut Input, mut callback: impl FnMut(usize, i32)) {
         // assign task if nothing is processing.
         if task.is_none() {
             let op = stack.pop_front().unwrap();
-
             let after = match op {
                 Op::Noop => cycle,
                 Op::Add(_) => cycle + 1,
             };
-
             task = Some(Task { op, after })
         }
 
         // pass value to callback once each cycle.
-        callback(cycle, value);
+        callback(cycle as i32, value);
 
         let current_task = task.as_ref().unwrap();
         // apply current task if due.

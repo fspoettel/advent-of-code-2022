@@ -157,13 +157,13 @@ mod child_commands {
             })
             .for_each(|(part, timing_str, nanos)| {
                 match part {
-                    "part 1" => {
+                    "Part 1" => {
                         timings.part_1 = Some(timing_str.into());
                     }
-                    "part 2" => {
+                    "Part 2" => {
                         timings.part_2 = Some(timing_str.into());
                     }
-                    "parser" => {
+                    "Parser" => {
                         timings.parser = Some(timing_str.into());
                     }
                     _ => {}

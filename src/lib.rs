@@ -29,11 +29,11 @@ macro_rules! parse {
         use std::time::Instant;
 
         let (result, duration) = runner::run_timed($parser, $input, |_| {
-            print!("parser: ");
+            print!("Parser: ");
         });
 
         print!("\r");
-        println!("parser: ✓ {}", duration);
+        println!("Parser: ✓ {}", duration);
         result
     }};
 }
@@ -48,12 +48,12 @@ macro_rules! solve {
         let (result, duration) = runner::run_timed($solver, $input, |result| {
             if let Some(result) = result {
                 if result.to_string().contains("\n") {
-                    print!("part {}: ", $part);
+                    print!("Part {}: ", $part);
                 } else {
-                    print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
+                    print!("Part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
                 }
             } else {
-                print!("part {}: ✖", $part);
+                print!("Part {}: ✖", $part);
             }
         });
 
@@ -61,11 +61,11 @@ macro_rules! solve {
             Some(result) => {
                 print!("\r");
                 if result.to_string().contains("\n") {
-                    println!("part {}: {}", $part, duration);
+                    println!("Part {}: ▼ {}", $part, duration);
                     println!("{}{}{}", ANSI_BOLD, result, ANSI_RESET);
                 } else {
                     println!(
-                        "part {}: {}{}{} {}",
+                        "Part {}: {}{}{} {}",
                         $part, ANSI_BOLD, result, ANSI_RESET, duration
                     );
                 }
@@ -73,7 +73,7 @@ macro_rules! solve {
             }
             None => {
                 print!("\r");
-                println!("part {}: not solved.", $part);
+                println!("Part {}: not solved.", $part);
             }
         }
     }};
