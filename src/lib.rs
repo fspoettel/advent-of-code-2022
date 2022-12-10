@@ -47,7 +47,12 @@ macro_rules! solve {
 
         let (result, duration) = runner::run_timed($solver, $input, |result| {
             if let Some(result) = result {
-                print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
+                let result_str = result.to_string();
+                if result_str.contains("\n") {
+                    print!("part {}: ", $part);
+                } else {
+                    print!("part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
+                }
             } else {
                 print!("part {}: ✖", $part);
             }
@@ -56,11 +61,16 @@ macro_rules! solve {
         match result {
             Some(result) => {
                 print!("\r");
-                println!(
-                    "part {}: {}{}{} {}",
-                    $part, ANSI_BOLD, result, ANSI_RESET, duration
-                );
-
+                let result_str = result.to_string();
+                if result_str.contains("\n") {
+                    println!("part {}: {}", $part, duration);
+                    println!("{}{}{}", ANSI_BOLD, result, ANSI_RESET);
+                } else {
+                    println!(
+                        "part {}: {}{}{} {}",
+                        $part, ANSI_BOLD, result, ANSI_RESET, duration
+                    );
+                }
                 aoc_cli::submit_result(result, $day, $part);
             }
             None => {
