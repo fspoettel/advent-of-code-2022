@@ -8,6 +8,7 @@ use std::process::{self, Command, Stdio};
 struct Args {
     day: u8,
     release: bool,
+    time: bool,
     submit: Option<u8>,
 }
 
@@ -17,10 +18,16 @@ fn parse_args() -> Result<Args, pico_args::Error> {
         day: args.free_from_str()?,
         release: args.contains("--release"),
         submit: args.opt_value_from_str("--submit")?,
+        time: args.contains("--time"),
     })
 }
 
-fn run_solution(day: u8, release: bool, submit_part: Option<u8>) -> Result<(), std::io::Error> {
+fn run_solution(
+    day: u8,
+    release: bool,
+    time: bool,
+    submit_part: Option<u8>,
+) -> Result<(), std::io::Error> {
     let day_padded = format!("{:02}", day);
 
     let mut cmd_args = vec!["run".to_string(), "--bin".to_string(), day_padded];
@@ -29,10 +36,15 @@ fn run_solution(day: u8, release: bool, submit_part: Option<u8>) -> Result<(), s
         cmd_args.push("--release".to_string());
     }
 
+    cmd_args.push("--".to_string());
+
     if let Some(submit_part) = submit_part {
-        cmd_args.push("--".to_string());
         cmd_args.push("--submit".to_string());
         cmd_args.push(submit_part.to_string())
+    }
+
+    if time {
+        cmd_args.push("--time".to_string());
     }
 
     let mut cmd = Command::new("cargo")
@@ -54,5 +66,5 @@ fn main() {
         }
     };
 
-    run_solution(args.day, args.release, args.submit).unwrap();
+    run_solution(args.day, args.release, args.time, args.submit).unwrap();
 }

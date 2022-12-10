@@ -10,6 +10,7 @@ use std::io;
 /// When `--time` is passed, the output of the benchmark is written to the readme.
 fn main() {
     let mut timings = vec![];
+    let is_timed = std::env::args().any(|x| x == "--time");
 
     (1..=25).for_each(|day| {
         if day > 1 {
@@ -19,7 +20,7 @@ fn main() {
         println!("{}Day {}{}", ANSI_BOLD, day, ANSI_RESET);
         println!("------");
 
-        let output = child_commands::run_solution(day).unwrap();
+        let output = child_commands::run_solution(day, is_timed).unwrap();
 
         if output.is_empty() {
             println!("Not solved.");
@@ -29,18 +30,20 @@ fn main() {
         }
     });
 
-    let total_millis = timings.iter().map(|x| x.total_nanos).sum::<f64>() / 1000000_f64;
+    if is_timed {
+        let total_millis = timings.iter().map(|x| x.total_nanos).sum::<f64>() / 1000000_f64;
 
-    println!(
-        "\n{}Total:{} {}{:.2}ms{}",
-        ANSI_BOLD, ANSI_RESET, ANSI_ITALIC, total_millis, ANSI_RESET
-    );
+        println!(
+            "\n{}Total:{} {}{:.2}ms{}",
+            ANSI_BOLD, ANSI_RESET, ANSI_ITALIC, total_millis, ANSI_RESET
+        );
 
-    if cfg!(not(debug_assertions)) && std::env::args().any(|x| x == "--time") {
-        match readme::update(timings, total_millis) {
-            Ok(_) => println!("Successfully updated README with benchmarks."),
-            Err(_) => {
-                eprintln!("Failed to update readme with benchmarks.");
+        if cfg!(not(debug_assertions)) {
+            match readme::update(timings, total_millis) {
+                Ok(_) => println!("Successfully updated README with benchmarks."),
+                Err(_) => {
+                    eprintln!("Failed to update readme with benchmarks.");
+                }
             }
         }
     }
@@ -83,7 +86,7 @@ mod child_commands {
     };
 
     /// Run the solution bin for a given day
-    pub fn run_solution(day: usize) -> Result<Vec<String>, Error> {
+    pub fn run_solution(day: usize, is_timed: bool) -> Result<Vec<String>, Error> {
         let day_padded = format!("{:02}", day);
 
         // skip command invocation for days that have not been scaffolded yet.
@@ -95,6 +98,12 @@ mod child_commands {
         if cfg!(not(debug_assertions)) {
             // mirror `--release` flag to child invocations.
             args.push("--release");
+        }
+
+        if is_timed {
+            // mirror `--time` flag to child invocations.
+            args.push("--");
+            args.push("--time");
         }
 
         // spawn child command with piped stdout/stderr.
@@ -140,7 +149,7 @@ mod child_commands {
         output
             .iter()
             .filter_map(|l| {
-                if !l.contains("(avg. time:") {
+                if !l.contains(" samples)") {
                     return None;
                 }
 
@@ -181,7 +190,14 @@ mod child_commands {
 
     fn parse_time(line: &str) -> Option<(&str, f64)> {
         // for possible time formats, see: https://github.com/rust-lang/rust/blob/1.64.0/library/core/src/time.rs#L1176-L1200
-        let str_timing = line.split("(avg. time:").last()?.split('@').next()?.trim();
+        let str_timing = line
+            .split(" samples)")
+            .next()?
+            .split('(')
+            .last()?
+            .split('@')
+            .next()?
+            .trim();
 
         let parsed_timing = match str_timing {
             s if s.contains("ns") => s.split("ns").next()?.parse::<f64>().ok(),
@@ -214,9 +230,9 @@ mod child_commands {
         #[test]
         fn test_well_formed() {
             let res = parse_exec_time(&[
-                "Parser: ✓ (avg. time: 7.3µs @ 6579 samples)".into(),
-                "Part 1: 0 (avg. time: 74.13ns @ 100000 samples)".into(),
-                "Part 2: 10 (avg. time: 74.13ms @ 99999 samples)".into(),
+                "Parser: ✓ (7.3µs @ 6579 samples)".into(),
+                "Part 1: 0 (74.13ns @ 100000 samples)".into(),
+                "Part 2: 10 (74.13ms @ 99999 samples)".into(),
                 "".into(),
             ]);
             assert_approx_eq!(res.total_nanos, 74137374.13_f64);
@@ -228,9 +244,9 @@ mod child_commands {
         #[test]
         fn test_patterns_in_input() {
             let res = parse_exec_time(&[
-                "Parser: ✓    (avg. time: 1s @ 5 samples)".into(),
-                "Part 1: @ @ @ ms (avg. time: 2s @ 5 samples)".into(),
-                "Part 2: 10s (avg. time: 100ms @ 1 samples)".into(),
+                "Parser: ✓    (1s @ 5 samples)".into(),
+                "Part 1: @ @ @ ( ) ms (2s @ 5 samples)".into(),
+                "Part 2: 10s (100ms @ 1 samples)".into(),
                 "".into(),
             ]);
             assert_approx_eq!(res.total_nanos, 3100000000_f64);
@@ -242,9 +258,9 @@ mod child_commands {
         #[test]
         fn test_missing_parts() {
             let res = parse_exec_time(&[
-                "Parser: ✓ (avg. time: 1ms @ 6579 samples)".into(),
-                "Part 1: not solved.".into(),
-                "Part 2: not solved.".into(),
+                "Parser: ✓ (1ms @ 6579 samples)".into(),
+                "Part 1: ✖        ".into(),
+                "Part 2: ✖        ".into(),
                 "".into(),
             ]);
             assert_approx_eq!(res.total_nanos, 1000000_f64);

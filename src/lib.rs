@@ -20,151 +20,24 @@ pub fn read_file(folder: &str, day: u8) -> String {
     f.expect("could not open input file")
 }
 
-/// The parse macro wraps a parsing function with formatted console output.
-/// When run with --release, parser code will be benchmarked.
-#[macro_export]
-macro_rules! parse {
-    ($parser:ident, $input:expr) => {{
-        use advent_of_code::{runner, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
-        use std::time::Instant;
-
-        let (result, duration) = runner::run_timed($parser, $input, |_| {
-            print!("Parser: ");
-        });
-
-        print!("\r");
-        println!("Parser: ✓ {}", duration);
-        result
-    }};
-}
-
-/// solve! wraps a solution part with formatted console output.
-/// When run with `--release`, parser code will be benchmarked.
-#[macro_export]
-macro_rules! solve {
-    ($day:expr, $part:expr, $solver:ident, $input:expr) => {{
-        use advent_of_code::{aoc_cli, runner, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
-
-        let (result, duration) = runner::run_timed($solver, $input, |result| {
-            if let Some(result) = result {
-                if result.to_string().contains("\n") {
-                    print!("Part {}: ", $part);
-                } else {
-                    print!("Part {}: {}{}{} ", $part, ANSI_BOLD, result, ANSI_RESET);
-                }
-            } else {
-                print!("Part {}: ✖", $part);
-            }
-        });
-
-        match result {
-            Some(result) => {
-                print!("\r");
-                if result.to_string().contains("\n") {
-                    println!("Part {}: ▼ {}", $part, duration);
-                    println!("{}{}{}", ANSI_BOLD, result, ANSI_RESET);
-                } else {
-                    println!(
-                        "Part {}: {}{}{} {}",
-                        $part, ANSI_BOLD, result, ANSI_RESET, duration
-                    );
-                }
-                aoc_cli::submit_result(result, $day, $part);
-            }
-            None => {
-                print!("\r");
-                println!("Part {}: not solved.", $part);
-            }
-        }
-    }};
-}
-
-/// main! produced a block setting up the input, parse! and solve! for each part.
+/// main! produces a block setting up the input and runner for each part.
 #[macro_export]
 macro_rules! main {
     ($day:expr) => {
         fn main() {
             let input = advent_of_code::read_file("inputs", $day);
-            let parsed = advent_of_code::parse!(parse, &input);
-            advent_of_code::solve!($day, 1, part_one, parsed.clone());
-            advent_of_code::solve!($day, 2, part_two, parsed.clone());
+            let parsed = advent_of_code::runner::parser(parse, &input);
+            advent_of_code::runner::part(part_one, parsed.clone(), $day, 1);
+            advent_of_code::runner::part(part_two, parsed.clone(), $day, 2);
         }
     };
 }
 
-/// Encapsulates code that interacts with solution functions.
-pub mod runner {
-    use super::{ANSI_ITALIC, ANSI_RESET};
-    use std::cmp;
-    use std::io::{stdout, Write};
-    use std::time::{Duration, Instant};
-
-    /// Run a solution part. The behavior differs depending on whether
-    /// we are running a release or debug build:
-    ///  1. in debug, the function is executed once.
-    ///  2. in release, the function is benched (approx. 1 second of execution time or 10 runs, whatever take longer.)
-    pub fn run_timed<I: Clone, T>(
-        func: impl Fn(I) -> T,
-        input: I,
-        hook: impl Fn(&T),
-    ) -> (T, String) {
-        let timer = Instant::now();
-        let result = func(input.clone());
-        let base_time = timer.elapsed();
-
-        hook(&result);
-
-        let duration = match cfg!(debug_assertions) {
-            true => format_duration(&base_time, 1),
-            false => bench(func, input, &base_time),
-        };
-
-        (result, duration)
-    }
-
-    fn average_duration(numbers: &[Duration]) -> u128 {
-        numbers.iter().map(|d| d.as_nanos()).sum::<u128>() / numbers.len() as u128
-    }
-
-    fn format_duration(duration: &Duration, iterations: u64) -> String {
-        format!("(avg. time: {:.1?} @ {} samples)", duration, iterations)
-    }
-
-    fn bench<I: Clone, T>(func: impl Fn(I) -> T, input: I, base_time: &Duration) -> String {
-        let mut stdout = stdout();
-
-        print!("> {}benching{}", ANSI_ITALIC, ANSI_RESET);
-        let _ = stdout.flush();
-
-        let bench_iterations = cmp::min(
-            100000,
-            cmp::max(
-                Duration::from_secs(1).as_nanos() / cmp::max(base_time.as_nanos(), 10),
-                10,
-            ),
-        );
-
-        let mut timers: Vec<Duration> = vec![];
-
-        for _ in 0..bench_iterations {
-            // need a clone here to make the borrow checker happy.
-            let cloned = input.clone();
-            let timer = Instant::now();
-            func(cloned);
-            timers.push(timer.elapsed());
-        }
-
-        let avg_time = Duration::from_nanos(average_duration(&timers) as u64);
-        format_duration(&avg_time, bench_iterations as u64)
-    }
-}
-
-/// Wrapper module around the "aoc-cli" CLI.
+/// Wrapper module around the "aoc-cli" command-line.
 pub mod aoc_cli {
     use std::{
-        env,
         fmt::Display,
-        process::{self, Command, Output, Stdio},
+        process::{Command, Output, Stdio},
     };
 
     #[derive(Debug)]
@@ -240,53 +113,12 @@ pub mod aoc_cli {
         }
     }
 
-    /// Parse the arguments passed to `solve` and try to submit one part of the solution if:
-    ///  1. we are in `--release` mode.
-    ///  2. aoc-cli is installed.
-    pub fn submit_result<T: Display>(
-        result: T,
-        day: u8,
-        part: u8,
-    ) -> Option<Result<Output, AocCliError>> {
-        let args: Vec<String> = env::args().collect();
-        if !args.contains(&"--submit".into()) {
-            return None;
-        }
-
-        if args.len() < 3 {
-            eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
-            process::exit(1);
-        }
-
-        let part_index = args.iter().position(|x| x == "--submit").unwrap() + 1;
-        let part_submit = match args[part_index].parse::<u8>() {
-            Ok(x) => x,
-            Err(_) => {
-                eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
-                process::exit(1);
-            }
-        };
-
-        if part_submit != part {
-            return None;
-        }
-
-        if cfg!(debug_assertions) {
-            eprintln!("--submit has no effect in debug mode.");
-            return None;
-        }
-
-        if check().is_err() {
-            eprintln!("command \"aoc\" not found or not callable. Try running \"cargo install aoc-cli\" to install it.");
-            process::exit(1);
-        }
-
+    pub fn submit(day: u8, part: u8, result: &str) -> Result<Output, AocCliError> {
         // workaround: the argument order is inverted for submit.
         let mut args = build_args("submit", &[], day);
         args.push(part.to_string());
         args.push(result.to_string());
-
-        Some(call_aoc_cli(&args))
+        call_aoc_cli(&args)
     }
 
     fn get_input_path(day: u8) -> String {
@@ -320,12 +152,187 @@ pub mod aoc_cli {
     }
 
     fn call_aoc_cli(args: &[String]) -> Result<Output, AocCliError> {
-        println!("Calling >aoc with: {}", args.join(" "));
+        // println!("Calling >aoc with: {}", args.join(" "));
         Command::new("aoc")
             .args(args)
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .output()
             .map_err(|_| AocCliError::CommandNotCallable)
+    }
+}
+
+/// Encapsulates code that interacts with solution functions.
+pub mod runner {
+    use super::{aoc_cli, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
+    use std::fmt::Display;
+    use std::io::{stdout, Write};
+    use std::process::Output;
+    use std::time::{Duration, Instant};
+    use std::{cmp, env, process};
+
+    pub fn parser<I: Clone, T>(func: impl Fn(I) -> T, input: I) -> T {
+        let (result, duration, samples) = run_timed(func, input, |_| {
+            print_result(&Some("✓"), "Parser", "");
+        });
+        print_result(&Some("✓"), "Parser", &format_duration(&duration, samples));
+        result
+    }
+
+    pub fn part<I: Clone, T: Display>(func: impl Fn(I) -> Option<T>, input: I, day: u8, part: u8) {
+        let part_str = format!("Part {}", part);
+
+        let (result, duration, samples) =
+            run_timed(func, input, |result| print_result(result, &part_str, ""));
+
+        print_result(&result, &part_str, &format_duration(&duration, samples));
+
+        if let Some(result) = result {
+            submit_result(result, day, part);
+        }
+    }
+
+    /// Run a solution part. The behavior differs depending on whether we are running a release or debug build:
+    ///  1. in debug, the function is executed once.
+    ///  2. in release, the function is benched (approx. 1 second of execution time or 10 samples, whatever take longer.)
+    fn run_timed<I: Clone, T>(
+        func: impl Fn(I) -> T,
+        input: I,
+        hook: impl Fn(&T),
+    ) -> (T, Duration, u128) {
+        let timer = Instant::now();
+        let result = func(input.clone());
+        let base_time = timer.elapsed();
+
+        hook(&result);
+
+        let run = match std::env::args().any(|x| x == "--time") {
+            true => bench(func, input, &base_time),
+            false => (base_time, 1),
+        };
+
+        (result, run.0, run.1)
+    }
+
+    fn bench<I: Clone, T>(
+        func: impl Fn(I) -> T,
+        input: I,
+        base_time: &Duration,
+    ) -> (Duration, u128) {
+        let mut stdout = stdout();
+
+        print!(" > {}benching{}", ANSI_ITALIC, ANSI_RESET);
+        let _ = stdout.flush();
+
+        let bench_iterations = cmp::min(
+            100000,
+            cmp::max(
+                Duration::from_secs(1).as_nanos() / cmp::max(base_time.as_nanos(), 10),
+                10,
+            ),
+        );
+
+        let mut timers: Vec<Duration> = vec![];
+
+        for _ in 0..bench_iterations {
+            // need a clone here to make the borrow checker happy.
+            let cloned = input.clone();
+            let timer = Instant::now();
+            func(cloned);
+            timers.push(timer.elapsed());
+        }
+
+        (
+            Duration::from_nanos(average_duration(&timers) as u64),
+            bench_iterations as u128,
+        )
+    }
+
+    fn average_duration(numbers: &[Duration]) -> u128 {
+        numbers.iter().map(|d| d.as_nanos()).sum::<u128>() / numbers.len() as u128
+    }
+
+    fn format_duration(duration: &Duration, samples: u128) -> String {
+        if samples == 1 {
+            format!(" ({:.1?})", duration)
+        } else {
+            format!(" ({:.1?} @ {} samples)", duration, samples)
+        }
+    }
+
+    fn print_result<T: Display>(result: &Option<T>, part: &str, duration_str: &str) {
+        match result {
+            Some(result) => {
+                print!("\r");
+
+                if result.to_string().contains('\n') {
+                    let str = format!("{}: ▼ {}", part, duration_str);
+                    if duration_str.is_empty() {
+                        print!("{}", str);
+                    } else {
+                        println!("{}", str);
+                    }
+                } else {
+                    let str = format!(
+                        "{}: {}{}{}{}",
+                        part, ANSI_BOLD, result, ANSI_RESET, duration_str
+                    );
+                    if duration_str.is_empty() {
+                        print!("{}", str);
+                    } else {
+                        println!("{}", str);
+                    }
+                }
+            }
+            None => {
+                print!("\r");
+                if duration_str.is_empty() {
+                    print!("{}: ✖", part);
+                } else {
+                    println!("{}: ✖             ", part);
+                }
+            }
+        }
+    }
+
+    /// Parse the arguments passed to `solve` and try to submit one part of the solution if:
+    ///  1. we are in `--release` mode.
+    ///  2. aoc-cli is installed.
+    fn submit_result<T: Display>(
+        result: T,
+        day: u8,
+        part: u8,
+    ) -> Option<Result<Output, aoc_cli::AocCliError>> {
+        let args: Vec<String> = env::args().collect();
+
+        if !args.contains(&"--submit".into()) {
+            return None;
+        }
+
+        if args.len() < 3 {
+            eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
+            process::exit(1);
+        }
+
+        let part_index = args.iter().position(|x| x == "--submit").unwrap() + 1;
+        let part_submit = match args[part_index].parse::<u8>() {
+            Ok(x) => x,
+            Err(_) => {
+                eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
+                process::exit(1);
+            }
+        };
+
+        if part_submit != part {
+            return None;
+        }
+
+        if aoc_cli::check().is_err() {
+            eprintln!("command \"aoc\" not found or not callable. Try running \"cargo install aoc-cli\" to install it.");
+            process::exit(1);
+        }
+
+        println!("Submitting result via aoc-cli...");
+        Some(aoc_cli::submit(day, part, &result.to_string()))
     }
 }
