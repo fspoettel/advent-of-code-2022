@@ -36,8 +36,8 @@ fn move_rope(steps: &Input, knot_count: usize) -> usize {
     // each knot starts at (0, 0).
     let mut knots: Vec<Point> = (0..knot_count).map(|_| Point { x: 0, y: 0 }).collect();
 
-    let mut tail_plot = SparseGrid::default();
-    tail_plot.insert(Point { x: 0, y: 0 }, true);
+    let mut tail_grid = SparseGrid::default();
+    tail_grid.insert(Point { x: 0, y: 0 }, true);
 
     steps.iter().for_each(|(dir, steps)| {
         for _ in 0..*steps {
@@ -46,18 +46,19 @@ fn move_rope(steps: &Input, knot_count: usize) -> usize {
             for i in 0..(knot_count - 1) {
                 let head = &knots[i];
                 let tail = &knots[i + 1];
+                let tail_moves = head.chebyshev_distance(tail) > 1;
 
-                if head.chebyshev_distance(tail) > 1 {
+                if tail_moves {
                     knots[i + 1] = move_knot(head, tail);
                     if i == knot_count - 2 {
-                        tail_plot.insert(knots[i + 1].clone(), true)
+                        tail_grid.insert(knots[i + 1].clone(), true)
                     }
                 }
             }
         }
     });
 
-    tail_plot.points.len()
+    tail_grid.points.len()
 }
 
 pub fn part_one(steps: Input) -> Option<usize> {
