@@ -214,9 +214,9 @@ mod child_commands {
         #[test]
         fn test_well_formed() {
             let res = parse_exec_time(&[
-                "parser: ✓ (avg. time: 7.3µs @ 6579 samples)".into(),
-                "part 1: 0 (avg. time: 74.13ns @ 100000 samples)".into(),
-                "part 2: 10 (avg. time: 74.13ms @ 99999 samples)".into(),
+                "Parser: ✓ (avg. time: 7.3µs @ 6579 samples)".into(),
+                "Part 1: 0 (avg. time: 74.13ns @ 100000 samples)".into(),
+                "Part 2: 10 (avg. time: 74.13ms @ 99999 samples)".into(),
                 "".into(),
             ]);
             assert_approx_eq!(res.total_nanos, 74137374.13_f64);
@@ -228,9 +228,9 @@ mod child_commands {
         #[test]
         fn test_patterns_in_input() {
             let res = parse_exec_time(&[
-                "parser: ✓    (avg. time: 1s @ 5 samples)".into(),
-                "part 1: @ @ @ ms (avg. time: 2s @ 5 samples)".into(),
-                "part 2: 10s (avg. time: 100ms @ 1 samples)".into(),
+                "Parser: ✓    (avg. time: 1s @ 5 samples)".into(),
+                "Part 1: @ @ @ ms (avg. time: 2s @ 5 samples)".into(),
+                "Part 2: 10s (avg. time: 100ms @ 1 samples)".into(),
                 "".into(),
             ]);
             assert_approx_eq!(res.total_nanos, 3100000000_f64);
@@ -242,9 +242,9 @@ mod child_commands {
         #[test]
         fn test_missing_parts() {
             let res = parse_exec_time(&[
-                "parser: ✓ (avg. time: 1ms @ 6579 samples)".into(),
-                "part 1: not solved.".into(),
-                "part 2: not solved.".into(),
+                "Parser: ✓ (avg. time: 1ms @ 6579 samples)".into(),
+                "Part 1: not solved.".into(),
+                "Part 2: not solved.".into(),
                 "".into(),
             ]);
             assert_approx_eq!(res.total_nanos, 1000000_f64);
