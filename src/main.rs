@@ -165,18 +165,13 @@ mod child_commands {
                 Some((part, timing_str, nanos))
             })
             .for_each(|(part, timing_str, nanos)| {
-                match part {
-                    "Part 1" => {
-                        timings.part_1 = Some(timing_str.into());
-                    }
-                    "Part 2" => {
-                        timings.part_2 = Some(timing_str.into());
-                    }
-                    "Parser" => {
-                        timings.parser = Some(timing_str.into());
-                    }
-                    _ => {}
-                };
+                if part.contains("Part 1") {
+                    timings.part_1 = Some(timing_str.into());
+                } else if part.contains("Part 2") {
+                    timings.part_2 = Some(timing_str.into());
+                } else if part.contains("Parser") {
+                    timings.parser = Some(timing_str.into());
+                }
 
                 timings.total_nanos += nanos;
             });
