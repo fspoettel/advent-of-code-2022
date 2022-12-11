@@ -261,34 +261,37 @@ pub mod runner {
     }
 
     fn print_result<T: Display>(result: &Option<T>, part: &str, duration_str: &str) {
+        let is_intermediate_result = duration_str.is_empty();
+
         match result {
             Some(result) => {
-                print!("\r");
-
                 if result.to_string().contains('\n') {
                     let str = format!("{}: ▼ {}", part, duration_str);
-                    if duration_str.is_empty() {
+                    if is_intermediate_result {
                         print!("{}", str);
                     } else {
+                        print!("\r");
                         println!("{}", str);
+                        println!("{}", result);
                     }
                 } else {
                     let str = format!(
                         "{}: {}{}{}{}",
                         part, ANSI_BOLD, result, ANSI_RESET, duration_str
                     );
-                    if duration_str.is_empty() {
+                    if is_intermediate_result {
                         print!("{}", str);
                     } else {
+                        print!("\r");
                         println!("{}", str);
                     }
                 }
             }
             None => {
-                print!("\r");
-                if duration_str.is_empty() {
+                if is_intermediate_result {
                     print!("{}: ✖", part);
                 } else {
+                    print!("\r");
                     println!("{}: ✖             ", part);
                 }
             }
