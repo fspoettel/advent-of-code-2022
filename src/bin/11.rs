@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 type Input = Vec<Monkey>;
 
 #[derive(Clone)]
@@ -116,11 +114,11 @@ fn simulate(mut monkeys: Input, rounds: usize, func: impl Fn(u64) -> u64) -> usi
         for i in 0..(monkeys.len()) {
             let monkey = &mut monkeys[i];
 
-            let items = monkey
+            let items: Vec<u64> = monkey
                 .items
                 .drain(..)
                 .map(|item| func(monkey.operation.apply(item)))
-                .collect_vec();
+                .collect();
 
             inspections[i] += items.len();
 
