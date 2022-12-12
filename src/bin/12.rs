@@ -1,6 +1,4 @@
-use advent_of_code::helpers::{
-    grid_utils::Point, shortest_path::shortest_path, simple_grid::SimpleGrid,
-};
+use advent_of_code::{shortest_path::shortest_path, Point, SimpleGrid};
 
 type Input<'a> = (SimpleGrid<char>, Point, Point);
 

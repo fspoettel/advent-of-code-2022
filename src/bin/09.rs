@@ -1,7 +1,4 @@
-use advent_of_code::helpers::{
-    grid_utils::{Direction, Point},
-    sparse_grid::SparseGrid,
-};
+use advent_of_code::{Direction, Point, SparseGrid};
 use std::cmp;
 
 type Input = Vec<Step>;
