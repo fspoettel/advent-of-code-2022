@@ -10,7 +10,7 @@ static DIRECTIONS: [Direction; 4] = [
 ];
 
 fn parse(input: &str) -> Input {
-    SimpleGrid::from_str(input, &|x| x.to_digit(10).unwrap())
+    SimpleGrid::from_str(input, &mut |c, _, _| c.to_digit(10).unwrap())
 }
 
 pub fn part_one(grid: Input) -> Option<usize> {
@@ -18,7 +18,7 @@ pub fn part_one(grid: Input) -> Option<usize> {
         grid.points()
             .iter()
             .filter(|point| {
-                if grid.is_edge(point) {
+                if grid.is_boundary(point) {
                     true
                 } else {
                     let size = grid.get(point);
@@ -37,7 +37,7 @@ pub fn part_one(grid: Input) -> Option<usize> {
 pub fn part_two(grid: Input) -> Option<isize> {
     grid.points()
         .iter()
-        .filter(|point| !grid.is_edge(point))
+        .filter(|point| !grid.is_boundary(point))
         .map(|point| {
             let size = grid.get(point);
 
