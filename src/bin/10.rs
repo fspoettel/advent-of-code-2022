@@ -96,7 +96,7 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let result = part_one(parse(&advent_of_code::read_file("examples", 10)));
+        let result = part_one(parse(&advent_of_code::template::read_file("examples", 10)));
         assert_eq!(result, Some(13140));
     }
 
@@ -110,7 +110,7 @@ mod tests {
             "🎅🎅🎅🎅🎅🎅🌑🌑🌑🌑🌑🌑🎅🎅🎅🎅🎅🎅🌑🌑🌑🌑🌑🌑🎅🎅🎅🎅🎅🎅🌑🌑🌑🌑🌑🌑🎅🎅🎅🎅",
             "🎅🎅🎅🎅🎅🎅🎅🌑🌑🌑🌑🌑🌑🌑🎅🎅🎅🎅🎅🎅🎅🌑🌑🌑🌑🌑🌑🌑🎅🎅🎅🎅🎅🎅🎅🌑🌑🌑🌑🌑",
         ];
-        let result = part_two(parse(&advent_of_code::read_file("examples", 10)));
+        let result = part_two(parse(&advent_of_code::template::read_file("examples", 10)));
         assert_eq!(result, Some(s.join("\n").to_string()));
     }
 }

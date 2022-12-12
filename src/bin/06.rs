@@ -39,7 +39,7 @@ mod tests {
     use super::*;
 
     fn test_answer(func: &dyn Fn(Input) -> Option<usize>, answers: &[usize]) {
-        advent_of_code::read_file("examples", 6)
+        advent_of_code::template::read_file("examples", 6)
             .lines()
             .enumerate()
             .for_each(|(i, l)| {

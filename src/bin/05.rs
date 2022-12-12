@@ -65,13 +65,13 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let result = part_one(parse(&advent_of_code::read_file("examples", 5)));
+        let result = part_one(parse(&advent_of_code::template::read_file("examples", 5)));
         assert_eq!(result, Some("CMZ".into()));
     }
 
     #[test]
     fn test_part_two() {
-        let result = part_two(parse(&advent_of_code::read_file("examples", 5)));
+        let result = part_two(parse(&advent_of_code::template::read_file("examples", 5)));
         assert_eq!(result, Some("MCD".into()));
     }
 }

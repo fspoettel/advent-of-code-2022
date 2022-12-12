@@ -82,13 +82,13 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let result = part_one(parse(&advent_of_code::read_file("examples", 7)));
+        let result = part_one(parse(&advent_of_code::template::read_file("examples", 7)));
         assert_eq!(result, Some(95437));
     }
 
     #[test]
     fn test_part_two() {
-        let result = part_two(parse(&advent_of_code::read_file("examples", 7)));
+        let result = part_two(parse(&advent_of_code::template::read_file("examples", 7)));
         assert_eq!(result, Some(24933642));
     }
 }

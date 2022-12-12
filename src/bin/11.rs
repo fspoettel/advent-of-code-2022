@@ -158,13 +158,13 @@ mod test {
 
     #[test]
     fn divide_by_part_one() {
-        let result = part_one(parse(&advent_of_code::read_file("examples", 11)));
+        let result = part_one(parse(&advent_of_code::template::read_file("examples", 11)));
         assert_eq!(result, Some(10605));
     }
 
     #[test]
     fn divide_by_part_two() {
-        let result = part_two(parse(&advent_of_code::read_file("examples", 11)));
+        let result = part_two(parse(&advent_of_code::template::read_file("examples", 11)));
         assert_eq!(result, Some(2713310158));
     }
 }

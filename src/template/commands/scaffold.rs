@@ -1,7 +1,3 @@
-/*
- * This file contains template code.
- * There is no need to edit this file unless you want to change template functionality.
- */
 use std::{
     fs::{File, OpenOptions},
     io::Write,
@@ -30,22 +26,17 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let result = part_one(parse(&advent_of_code::read_file("examples", DAY)));
+        let result = part_one(parse(&advent_of_code::template::read_file("examples", DAY)));
         assert_eq!(result, None);
     }
 
     #[test]
     fn test_part_two() {
-        let result = part_two(parse(&advent_of_code::read_file("examples", DAY)));
+        let result = part_two(parse(&advent_of_code::template::read_file("examples", DAY)));
         assert_eq!(result, None);
     }
 }
 "###;
-
-fn parse_args() -> Result<u8, pico_args::Error> {
-    let mut args = pico_args::Arguments::from_env();
-    args.free_from_str()
-}
 
 fn safe_create_file(path: &str) -> Result<File, std::io::Error> {
     OpenOptions::new().write(true).create_new(true).open(path)
@@ -55,19 +46,11 @@ fn create_file(path: &str) -> Result<File, std::io::Error> {
     OpenOptions::new().write(true).create(true).open(path)
 }
 
-fn main() {
-    let day = match parse_args() {
-        Ok(day) => day,
-        Err(_) => {
-            eprintln!("Need to specify a day (as integer). example: `cargo scaffold 7`");
-            process::exit(1);
-        }
-    };
-
+pub fn scaffold_handler(day: u8) {
     let day_padded = format!("{:02}", day);
 
-    let input_path = format!("src/inputs/{}.txt", day_padded);
-    let example_path = format!("src/examples/{}.txt", day_padded);
+    let input_path = format!("data/inputs/{}.txt", day_padded);
+    let example_path = format!("data/examples/{}.txt", day_padded);
     let module_path = format!("src/bin/{}.rs", day_padded);
 
     let mut file = match safe_create_file(&module_path) {

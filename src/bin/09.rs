@@ -77,14 +77,14 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = advent_of_code::read_file("examples", 9);
+        let input = advent_of_code::template::read_file("examples", 9);
         let result = part_one(parse(&input.split("\n\n").next().unwrap()));
         assert_eq!(result, Some(13));
     }
 
     #[test]
     fn test_part_two() {
-        let input = advent_of_code::read_file("examples", 9);
+        let input = advent_of_code::template::read_file("examples", 9);
         let result = part_two(parse(&input.split("\n\n").last().unwrap()));
         assert_eq!(result, Some(36));
     }
