@@ -1,6 +1,5 @@
 use advent_of_code::helpers::{
-    grid_utils::Point,
-    simple_grid::{shortest_path, SimpleGrid},
+    grid_utils::Point, shortest_path::shortest_path, simple_grid::SimpleGrid,
 };
 
 type Input<'a> = (SimpleGrid<char>, Point, Point);
@@ -31,10 +30,10 @@ fn parse(input: &str) -> Input {
 }
 
 fn find_path(grid: &SimpleGrid<char>, start: Vec<Point>, end: Point) -> Option<usize> {
-    shortest_path::shortest_path(
+    shortest_path(
         grid,
-        start,
-        end,
+        &start,
+        &end,
         |_| 1,
         |a, b| (*grid.get(b) as isize - *grid.get(a) as isize) < 2,
     )
@@ -50,7 +49,7 @@ pub fn part_two((grid, _, end): Input) -> Option<usize> {
         .into_iter()
         .filter(|point| *grid.get(point) == 'a')
         .collect();
-    find_path(&grid, start_points, end.clone())
+    find_path(&grid, start_points, end)
 }
 
 advent_of_code::main!(12);
