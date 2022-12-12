@@ -15,7 +15,8 @@ pub enum Direction {
     NorthWest,
 }
 
-/// A point in a 2D grid. Uses `isize` to support use in sparse grids where points may be negative.
+/// A point in a 2D grid.
+/// Uses `isize` to support use in sparse grids where point indexes may be negative.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Point {
     pub x: isize,
@@ -71,7 +72,7 @@ impl Point {
     }
 }
 
-/// Sparse grid where points may not exist or be negative.
+/// Sparse grid where points may not exist at creation, or be negative.
 #[derive(Clone)]
 pub struct SparseGrid<T> {
     pub points: HashMap<Point, T>,
@@ -123,6 +124,12 @@ impl<T> SimpleGrid<T> {
         }
     }
 
+    /// Get a reference to the value for a certain point in the grid.
+    /// NOTE: unchecked.
+    pub fn get(&self, point: &Point) -> &T {
+        &self.data[point.y as usize][point.x as usize]
+    }
+
     /// Get all points in grid.
     pub fn points(&self) -> Vec<Point> {
         let mut points = vec![];
@@ -137,12 +144,6 @@ impl<T> SimpleGrid<T> {
         }
 
         points
-    }
-
-    /// Get a reference to the value for a certain point in the grid.
-    /// NOTE: unchecked.
-    pub fn get(&self, point: &Point) -> &T {
-        &self.data[point.y as usize][point.x as usize]
     }
 
     /// Check if a point is inside the grid.

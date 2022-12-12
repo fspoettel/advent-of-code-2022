@@ -196,65 +196,65 @@ mod child_commands {
 
         Some((str_timing, parsed_timing))
     }
-}
 
-/// copied from: https://github.com/rust-lang/rust/blob/1.64.0/library/std/src/macros.rs#L328-L333
-#[cfg(test)]
-macro_rules! assert_approx_eq {
-    ($a:expr, $b:expr) => {{
-        let (a, b) = (&$a, &$b);
-        assert!(
-            (*a - *b).abs() < 1.0e-6,
-            "{} is not approximately equal to {}",
-            *a,
-            *b
-        );
-    }};
-}
-
-#[cfg(test)]
-mod tests {
-    use super::child_commands::parse_exec_time;
-
-    #[test]
-    fn test_well_formed() {
-        let res = parse_exec_time(&[
-            "Parser: ✓ (7.3µs @ 6579 samples)".into(),
-            "Part 1: 0 (74.13ns @ 100000 samples)".into(),
-            "Part 2: 10 (74.13ms @ 99999 samples)".into(),
-            "".into(),
-        ]);
-        assert_approx_eq!(res.total_nanos, 74137374.13_f64);
-        assert_eq!(res.parser.unwrap(), "7.3µs");
-        assert_eq!(res.part_1.unwrap(), "74.13ns");
-        assert_eq!(res.part_2.unwrap(), "74.13ms");
+    /// copied from: https://github.com/rust-lang/rust/blob/1.64.0/library/std/src/macros.rs#L328-L333
+    #[cfg(test)]
+    macro_rules! assert_approx_eq {
+        ($a:expr, $b:expr) => {{
+            let (a, b) = (&$a, &$b);
+            assert!(
+                (*a - *b).abs() < 1.0e-6,
+                "{} is not approximately equal to {}",
+                *a,
+                *b
+            );
+        }};
     }
 
-    #[test]
-    fn test_patterns_in_input() {
-        let res = parse_exec_time(&[
-            "Parser: ✓    (1s @ 5 samples)".into(),
-            "Part 1: @ @ @ ( ) ms (2s @ 5 samples)".into(),
-            "Part 2: 10s (100ms @ 1 samples)".into(),
-            "".into(),
-        ]);
-        assert_approx_eq!(res.total_nanos, 3100000000_f64);
-        assert_eq!(res.parser.unwrap(), "1s");
-        assert_eq!(res.part_1.unwrap(), "2s");
-        assert_eq!(res.part_2.unwrap(), "100ms");
-    }
+    #[cfg(test)]
+    mod tests {
+        use super::parse_exec_time;
 
-    #[test]
-    fn test_missing_parts() {
-        let res = parse_exec_time(&[
-            "Parser: ✓ (1ms @ 6579 samples)".into(),
-            "Part 1: ✖        ".into(),
-            "Part 2: ✖        ".into(),
-            "".into(),
-        ]);
-        assert_approx_eq!(res.total_nanos, 1000000_f64);
-        assert_eq!(res.parser.unwrap(), "1ms");
-        assert_eq!(res.part_1.is_none(), true);
-        assert_eq!(res.part_2.is_none(), true);
+        #[test]
+        fn test_well_formed() {
+            let res = parse_exec_time(&[
+                "Parser: ✓ (7.3µs @ 6579 samples)".into(),
+                "Part 1: 0 (74.13ns @ 100000 samples)".into(),
+                "Part 2: 10 (74.13ms @ 99999 samples)".into(),
+                "".into(),
+            ]);
+            assert_approx_eq!(res.total_nanos, 74137374.13_f64);
+            assert_eq!(res.parser.unwrap(), "7.3µs");
+            assert_eq!(res.part_1.unwrap(), "74.13ns");
+            assert_eq!(res.part_2.unwrap(), "74.13ms");
+        }
+
+        #[test]
+        fn test_patterns_in_input() {
+            let res = parse_exec_time(&[
+                "Parser: ✓    (1s @ 5 samples)".into(),
+                "Part 1: @ @ @ ( ) ms (2s @ 5 samples)".into(),
+                "Part 2: 10s (100ms @ 1 samples)".into(),
+                "".into(),
+            ]);
+            assert_approx_eq!(res.total_nanos, 3100000000_f64);
+            assert_eq!(res.parser.unwrap(), "1s");
+            assert_eq!(res.part_1.unwrap(), "2s");
+            assert_eq!(res.part_2.unwrap(), "100ms");
+        }
+
+        #[test]
+        fn test_missing_parts() {
+            let res = parse_exec_time(&[
+                "Parser: ✓ (1ms @ 6579 samples)".into(),
+                "Part 1: ✖        ".into(),
+                "Part 2: ✖        ".into(),
+                "".into(),
+            ]);
+            assert_approx_eq!(res.total_nanos, 1000000_f64);
+            assert_eq!(res.parser.unwrap(), "1ms");
+            assert_eq!(res.part_1.is_none(), true);
+            assert_eq!(res.part_2.is_none(), true);
+        }
     }
 }
