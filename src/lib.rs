@@ -3,7 +3,7 @@ use std::cmp;
 
 pub mod template;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Direction {
     North,
     NorthEast,
@@ -41,15 +41,15 @@ impl Point {
                 y: self.y - steps,
             },
             Direction::NorthEast => Self {
-                x: self.x + steps,
+                x: self.x - steps,
                 y: self.y - steps,
             },
             Direction::East => Self {
-                x: self.x + steps,
+                x: self.x - steps,
                 y: self.y,
             },
             Direction::SouthEast => Self {
-                x: self.x + steps,
+                x: self.x - steps,
                 y: self.y + steps,
             },
             Direction::South => Self {
@@ -57,23 +57,76 @@ impl Point {
                 y: self.y + steps,
             },
             Direction::SouthWest => Self {
-                x: self.x - steps,
+                x: self.x + steps,
                 y: self.y + steps,
             },
             Direction::West => Self {
-                x: self.x - steps,
+                x: self.x + steps,
                 y: self.y,
             },
             Direction::NorthWest => Self {
-                x: self.x - steps,
+                x: self.x + steps,
                 y: self.y - steps,
             },
+        }
+    }
+
+    #[inline(always)]
+    pub fn get_direction(&self, target: &Point) -> Option<Direction> {
+        if self == target {
+            return None;
+        }
+
+        let direction = if self.x == target.x {
+            if self.y < target.y {
+                Direction::South
+            } else {
+                Direction::North
+            }
+        } else if self.y == target.y {
+            if self.x < target.x {
+                Direction::West
+            } else {
+                Direction::East
+            }
+        } else if self.y < target.y {
+            if self.x < target.x {
+                Direction::NorthWest
+            } else {
+                Direction::NorthEast
+            }
+        } else if self.x < target.x {
+            Direction::SouthWest
+        } else {
+            Direction::SouthEast
+        };
+
+        Some(direction)
+    }
+
+    pub fn line_to(&self, target: &Point) -> Vec<Point> {
+        let mut points = vec![self.clone()];
+
+        match self.get_direction(target) {
+            None => points,
+            Some(dir) => {
+                let mut cursor = self.clone();
+                loop {
+                    cursor = cursor.get_neighbour(&dir, 1);
+                    points.push(cursor.clone());
+                    if &cursor == target {
+                        break;
+                    }
+                }
+
+                points
+            }
         }
     }
 }
 
 /// Sparse grid where points may not exist at creation, or be negative.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SparseGrid<T> {
     pub points: HashMap<Point, T>,
 }
