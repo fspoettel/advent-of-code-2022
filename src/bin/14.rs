@@ -1,18 +1,17 @@
-use std::cmp;
-
 use advent_of_code::{Direction, Point, SparseGrid};
 use itertools::Itertools;
+use std::cmp;
 
 type Grid = SparseGrid<PointType>;
 type Input<'a> = (Grid, isize);
-
-static SOURCE: Point = Point { x: 500, y: 0 };
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum PointType {
     Wall,
     Sand,
 }
+
+static SOURCE: Point = Point { x: 500, y: 0 };
 
 fn parse(input: &str) -> Input {
     input
@@ -65,19 +64,23 @@ fn count_sand(grid: &Grid) -> usize {
 }
 
 pub fn part_one((mut grid, floor): Input) -> Option<usize> {
-    let mut current_sand = SOURCE.clone();
+    let mut current_path = vec![SOURCE.clone()];
 
     loop {
-        match next_pos(&grid, &current_sand) {
-            Some(p) => current_sand = p,
-            None => {
-                grid.insert(current_sand, PointType::Sand);
-                current_sand = SOURCE.clone();
-            }
-        }
+        let current_sand = &current_path[current_path.len() - 1];
 
-        if current_sand.y >= floor {
-            break;
+        match next_pos(&grid, current_sand) {
+            Some(next_sand) => {
+                if current_sand.y >= floor {
+                    break;
+                } else {
+                    current_path.push(next_sand);
+                }
+            }
+            None => {
+                grid.insert(current_sand.clone(), PointType::Sand);
+                current_path.pop();
+            }
         }
     }
 
@@ -86,21 +89,24 @@ pub fn part_one((mut grid, floor): Input) -> Option<usize> {
 
 pub fn part_two((mut grid, floor): Input) -> Option<usize> {
     let floor = floor + 2;
-    let mut current_sand = SOURCE.clone();
+    let mut current_path = vec![SOURCE.clone()];
 
     loop {
-        if let Some(next_sand) = next_pos(&grid, &current_sand) {
+        let current_sand = &current_path[current_path.len() - 1];
+
+        if let Some(next_sand) = next_pos(&grid, current_sand) {
             if next_sand.y < floor {
-                current_sand = next_sand;
+                current_path.push(next_sand);
                 continue;
             }
-        } else if current_sand == SOURCE {
-            grid.insert(current_sand, PointType::Sand);
-            break;
         }
 
         grid.insert(current_sand.clone(), PointType::Sand);
-        current_sand = SOURCE.clone();
+        if current_sand == &SOURCE {
+            break;
+        } else {
+            current_path.pop();
+        }
     }
 
     Some(count_sand(&grid))
