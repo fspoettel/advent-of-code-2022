@@ -1,5 +1,5 @@
 use hashbrown::HashMap;
-use std::cmp;
+use std::{cmp, slice::Iter};
 
 pub mod template;
 
@@ -13,6 +13,23 @@ pub enum Direction {
     SouthWest,
     West,
     NorthWest,
+}
+
+impl Direction {
+    pub fn all() -> Iter<'static, Direction> {
+        static DIRECTIONS: [Direction; 8] = [
+            Direction::North,
+            Direction::NorthEast,
+            Direction::East,
+            Direction::SouthEast,
+            Direction::South,
+            Direction::SouthWest,
+            Direction::West,
+            Direction::NorthWest,
+        ];
+
+        DIRECTIONS.iter()
+    }
 }
 
 /// A point in a 2D grid.

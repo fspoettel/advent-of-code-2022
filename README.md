@@ -30,22 +30,23 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.
 
 | Day | Parser | Part 1 | Part 2 |
 | :---: | :---: | :---: | :---:  |
-| [Day 1](./src/bin/01.rs) | `35.5µs` | `16.0ns` | `5.4µs` |
-| [Day 2](./src/bin/02.rs) | `24.8µs` | `129.0ns` | `4.8µs` |
-| [Day 3](./src/bin/03.rs) | `4.5µs` | `13.5µs` | `12.3µs` |
-| [Day 4](./src/bin/04.rs) | `36.0µs` | `23.0ns` | `24.0ns` |
-| [Day 5](./src/bin/05.rs) | `69.3µs` | `33.3µs` | `34.2µs` |
-| [Day 6](./src/bin/06.rs) | `2.8µs` | `10.3µs` | `35.5µs` |
-| [Day 7](./src/bin/07.rs) | `72.9µs` | `104.0ns` | `212.0ns` |
-| [Day 8](./src/bin/08.rs) | `34.5µs` | `233.6µs` | `474.9µs` |
-| [Day 9](./src/bin/09.rs) | `35.5µs` | `171.4µs` | `376.2µs` |
-| [Day 10](./src/bin/10.rs) | `2.7µs` | `469.0ns` | `3.4µs` |
-| [Day 11](./src/bin/11.rs) | `3.2µs` | `11.2µs` | `6.2ms` |
-| [Day 12](./src/bin/12.rs) | `13.0µs` | `202.2µs` | `227.8µs` |
-| [Day 13](./src/bin/13.rs) | `527.9µs` | `317.8µs` | `2.6ms` |
-| [Day 14](./src/bin/14.rs) | `510.8µs` | `68.1µs` | `1.6ms` |
+| [Day 1](./src/bin/01.rs) | `36.5µs` | `16.0ns` | `5.3µs` |
+| [Day 2](./src/bin/02.rs) | `25.0µs` | `110.0ns` | `4.9µs` |
+| [Day 3](./src/bin/03.rs) | `4.9µs` | `14.0µs` | `12.8µs` |
+| [Day 4](./src/bin/04.rs) | `36.9µs` | `44.0ns` | `41.0ns` |
+| [Day 5](./src/bin/05.rs) | `69.7µs` | `33.9µs` | `36.1µs` |
+| [Day 6](./src/bin/06.rs) | `3.3µs` | `10.4µs` | `36.9µs` |
+| [Day 7](./src/bin/07.rs) | `70.5µs` | `111.0ns` | `216.0ns` |
+| [Day 8](./src/bin/08.rs) | `35.5µs` | `255.5µs` | `481.8µs` |
+| [Day 9](./src/bin/09.rs) | `36.8µs` | `173.0µs` | `385.5µs` |
+| [Day 10](./src/bin/10.rs) | `2.7µs` | `481.0ns` | `3.4µs` |
+| [Day 11](./src/bin/11.rs) | `3.2µs` | `11.5µs` | `6.3ms` |
+| [Day 12](./src/bin/12.rs) | `13.8µs` | `208.1µs` | `233.0µs` |
+| [Day 13](./src/bin/13.rs) | `515.8µs` | `324.0µs` | `2.7ms` |
+| [Day 14](./src/bin/14.rs) | `517.2µs` | `69.0µs` | `1.6ms` |
+| [Day 15](./src/bin/15.rs) | `4.6µs` | `61.4ms` | `-` |
 
-**Total: 14.01ms**
+**Total: 75.68ms**
 <!--- benchmarking table --->
 
 All solutions are measured (nonscientifically) via `cargo run --release` on a _M1 Macbook Air 2020_.
