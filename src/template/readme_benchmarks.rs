@@ -18,6 +18,7 @@ impl From<std::io::Error> for Error {
 
 #[derive(Clone)]
 pub struct Timings {
+    pub day: usize,
     pub part_1: Option<String>,
     pub part_2: Option<String>,
     pub parser: Option<String>,
@@ -67,11 +68,11 @@ fn construct_table(prefix: &str, timings: Vec<Timings>, total_millis: f64) -> St
         "| :---: | :---: | :---: | :---:  |".into(),
     ];
 
-    timings.into_iter().enumerate().for_each(|(i, timing)| {
-        let path = get_path_for_bin(i + 1);
+    timings.into_iter().for_each(|timing| {
+        let path = get_path_for_bin(timing.day);
         lines.push(format!(
             "| [Day {}]({}) | `{}` | `{}` | `{}` |",
-            i + 1,
+            timing.day,
             path,
             timing.parser.unwrap_or_else(|| "-".into()),
             timing.part_1.unwrap_or_else(|| "-".into()),
@@ -108,18 +109,21 @@ mod tests {
     fn get_mock_timings() -> Vec<Timings> {
         vec![
             Timings {
+                day: 1,
                 part_1: Some("10ms".into()),
                 part_2: Some("20ms".into()),
                 parser: None,
                 total_nanos: 3e+10,
             },
             Timings {
+                day: 2,
                 part_1: Some("30ms".into()),
                 part_2: Some("40ms".into()),
                 parser: None,
                 total_nanos: 7e+10,
             },
             Timings {
+                day: 4,
                 part_1: Some("40ms".into()),
                 part_2: Some("50ms".into()),
                 parser: None,
@@ -172,7 +176,7 @@ mod tests {
             "| :---: | :---: | :---: | :---:  |",
             "| [Day 1](./src/bin/01.rs) | `-` | `10ms` | `20ms` |",
             "| [Day 2](./src/bin/02.rs) | `-` | `30ms` | `40ms` |",
-            "| [Day 3](./src/bin/03.rs) | `-` | `40ms` | `50ms` |",
+            "| [Day 4](./src/bin/04.rs) | `-` | `40ms` | `50ms` |",
             "",
             "**Total: 190.00ms**",
             "<!--- benchmarking table --->",

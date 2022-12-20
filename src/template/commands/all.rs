@@ -21,7 +21,7 @@ pub fn all_handler(is_release: bool, is_timed: bool) {
         if output.is_empty() {
             println!("Not solved.");
         } else {
-            let val = child_commands::parse_exec_time(&output);
+            let val = child_commands::parse_exec_time(&output, day);
             timings.push(val);
         }
     });
@@ -131,8 +131,9 @@ mod child_commands {
         Ok(output)
     }
 
-    pub fn parse_exec_time(output: &[String]) -> super::Timings {
+    pub fn parse_exec_time(output: &[String], day: usize) -> super::Timings {
         let mut timings = super::Timings {
+            day,
             part_1: None,
             part_2: None,
             parser: None,
@@ -217,12 +218,15 @@ mod child_commands {
 
         #[test]
         fn test_well_formed() {
-            let res = parse_exec_time(&[
-                "Parser: ✓ (7.3µs @ 6579 samples)".into(),
-                "Part 1: 0 (74.13ns @ 100000 samples)".into(),
-                "Part 2: 10 (74.13ms @ 99999 samples)".into(),
-                "".into(),
-            ]);
+            let res = parse_exec_time(
+                &[
+                    "Parser: ✓ (7.3µs @ 6579 samples)".into(),
+                    "Part 1: 0 (74.13ns @ 100000 samples)".into(),
+                    "Part 2: 10 (74.13ms @ 99999 samples)".into(),
+                    "".into(),
+                ],
+                1,
+            );
             assert_approx_eq!(res.total_nanos, 74137374.13_f64);
             assert_eq!(res.parser.unwrap(), "7.3µs");
             assert_eq!(res.part_1.unwrap(), "74.13ns");
@@ -231,12 +235,15 @@ mod child_commands {
 
         #[test]
         fn test_patterns_in_input() {
-            let res = parse_exec_time(&[
-                "Parser: ✓    (1s @ 5 samples)".into(),
-                "Part 1: @ @ @ ( ) ms (2s @ 5 samples)".into(),
-                "Part 2: 10s (100ms @ 1 samples)".into(),
-                "".into(),
-            ]);
+            let res = parse_exec_time(
+                &[
+                    "Parser: ✓    (1s @ 5 samples)".into(),
+                    "Part 1: @ @ @ ( ) ms (2s @ 5 samples)".into(),
+                    "Part 2: 10s (100ms @ 1 samples)".into(),
+                    "".into(),
+                ],
+                1,
+            );
             assert_approx_eq!(res.total_nanos, 3100000000_f64);
             assert_eq!(res.parser.unwrap(), "1s");
             assert_eq!(res.part_1.unwrap(), "2s");
@@ -245,12 +252,15 @@ mod child_commands {
 
         #[test]
         fn test_missing_parts() {
-            let res = parse_exec_time(&[
-                "Parser: ✓ (1ms @ 6579 samples)".into(),
-                "Part 1: ✖        ".into(),
-                "Part 2: ✖        ".into(),
-                "".into(),
-            ]);
+            let res = parse_exec_time(
+                &[
+                    "Parser: ✓ (1ms @ 6579 samples)".into(),
+                    "Part 1: ✖        ".into(),
+                    "Part 2: ✖        ".into(),
+                    "".into(),
+                ],
+                1,
+            );
             assert_approx_eq!(res.total_nanos, 1000000_f64);
             assert_eq!(res.parser.unwrap(), "1ms");
             assert_eq!(res.part_1.is_none(), true);
